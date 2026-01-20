@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0
 */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { motion, useScroll, useTransform, AnimatePresence } from 'framer-motion';
 import { Briefcase, Globe, Zap, Code, Mail, Menu, X, ExternalLink, BookOpen, Database, Cpu, Layers, Terminal, Binary, Microscope } from 'lucide-react';
 import FluidBackground from './components/FluidBackground';
@@ -14,84 +14,531 @@ import ProjectCard from './components/ProjectCard';
 import AIChat from './components/AIChat';
 import { Project } from './types';
 
-const PROJECTS: Project[] = [
-  { 
-    id: '1', 
-    title: 'KDHΦ ERP Portal', 
-    category: 'ERP / Solution Engineering', 
-    year: '2025', 
+type Language = 'en' | 'el';
+type LocalizedText = { en: string; el: string };
+
+const PROJECT_DATA: Array<{
+  id: string;
+  title: LocalizedText;
+  category: LocalizedText;
+  image: string;
+  year: string;
+  description: LocalizedText;
+  techStack: string[];
+  link?: string;
+}> = [
+  {
+    id: 'kdhf-erp',
+    title: { en: 'KDHF ERP Platform', el: 'Πλατφόρμα KDHF ERP' },
+    category: { en: 'Private ERP', el: 'Ιδιωτικό ERP' },
+    year: '2025',
     image: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?q=80&w=1000&auto=format&fit=crop',
-    description: 'Developed and implemented the ERP portal for "Kipos tis Lysos". A comprehensive solution for internal management and digital workflow optimization.',
-    techStack: ['ERP', 'Solution Engineering', 'Business Logic'],
+    description: {
+      en: 'Private ERP suite for internal operations, reporting, and workflow automation.',
+      el: 'Ιδιωτική σουίτα ERP για εσωτερικές λειτουργίες, αναφορές και αυτοματοποίηση ροών εργασίας.'
+    },
+    techStack: ['HTML', 'CSS', 'ERP']
+    ,
     link: 'https://www.portal-lysos.gr'
   },
-  { 
-    id: '2', 
-    title: 'REC Management Research', 
-    category: 'Springer Publication', 
-    year: '2025', 
-    image: 'https://images.unsplash.com/photo-1639762681485-074b7f938ba0?q=80&w=1000&auto=format&fit=crop',
-    description: 'Comparative study of Solana and Ethereum blockchain implementations for Renewable Energy Certificates management. Published in Springer Nature.',
-    techStack: ['Solana', 'Ethereum', 'Blockchain Architecture'],
-    link: 'https://link.springer.com/article/10.1007/s00202-025-03402-2' // Updated DOI from OCR/Context
+  {
+    id: 'portfolio-site',
+    title: { en: 'Personal Portfolio Site', el: 'Προσωπικό Portfolio Site' },
+    category: { en: 'Web Experience', el: 'Web Experience' },
+    year: '2025',
+    image: 'https://images.unsplash.com/photo-1498050108023-c5249f4df085?q=80&w=1000&auto=format&fit=crop',
+    description: {
+      en: 'Interactive personal website built with TypeScript and motion-driven UI.',
+      el: 'Διαδραστικό προσωπικό site με TypeScript και δυναμικό UI.'
+    },
+    techStack: ['TypeScript', 'React', 'Vite'],
+    link: 'https://panagiotisvionis.github.io'
   },
-  { 
-    id: '3', 
-    title: 'Psychotherapy Christidou', 
-    category: 'Full Stack Web Dev', 
-    year: '2024', 
-    image: "https://psychotherapy-schristidou.gr/7.jpg",
-    description: 'Official platform for psychotherapist S. Christidou, featuring a clean, responsive design and professional UI/UX.',
+  {
+    id: 'psychotherapy-christidou',
+    title: { en: 'Psychotherapy Christidou', el: 'Psychotherapy Christidou' },
+    category: { en: 'Full Stack Web Dev', el: 'Full Stack Web Dev' },
+    year: '2024',
+    image: 'https://psychotherapy-schristidou.gr/7.jpg',
+    description: {
+      en: 'Official website for psychotherapist S. Christidou with a clean, responsive UI.',
+      el: 'Επίσημος ιστότοπος για την ψυχοθεραπεύτρια Σ. Χριστίδου με καθαρό, responsive UI.'
+    },
     techStack: ['React', 'TypeScript', 'Tailwind CSS'],
     link: 'https://psychotherapy-schristidou.gr/'
   },
-  { 
-    id: '4', 
-    title: 'Solana DApp / Anchor', 
-    category: 'Web3 Development', 
-    year: '2024', 
-    image: 'https://images.unsplash.com/photo-1644018335954-ab54c83e007f?q=80&w=1000&auto=format&fit=crop',
-    description: 'Decentralized application built on Solana using Rust. High-performance smart contracts for asset tracking.',
-    techStack: ['Rust', 'Anchor', 'Solana'],
-    link: 'https://github.com/panagiotisvionis'
+  {
+    id: 'gmail-follow-up',
+    title: { en: 'Gmail Auto Follow-Up', el: 'Gmail Auto Follow-Up' },
+    category: { en: 'Automation', el: 'Αυτοματοποίηση' },
+    year: '2025',
+    image: 'https://images.unsplash.com/photo-1518770660439-4636190af475?q=80&w=1000&auto=format&fit=crop',
+    description: {
+      en: 'Tracks sent emails and sends polite follow-ups via the Gmail API.',
+      el: 'Παρακολούθηση απεσταλμένων emails και αυτόματα follow-ups μέσω Gmail API.'
+    },
+    techStack: ['Python', 'Gmail API'],
+    link: 'https://github.com/panagiotisvionis/Gmail-Auto-Follow-Up-with-Python'
   },
-  { 
-    id: '5', 
-    title: 'Blockchain in Energy', 
-    category: 'Academic Review', 
-    year: '2024', 
+  {
+    id: 'arduino-tinkercad',
+    title: { en: 'Arduino Tinkercad Circuits', el: 'Arduino Tinkercad Circuits' },
+    category: { en: 'IoT & Electronics', el: 'IoT & Ηλεκτρονικά' },
+    year: '2025',
+    image: 'https://images.unsplash.com/photo-1518770660439-4636190af475?q=80&w=1000&auto=format&fit=crop',
+    description: {
+      en: 'Educational circuit designs with Arduino and Tinkercad simulations.',
+      el: 'Εκπαιδευτικά κυκλώματα με Arduino και προσομοιώσεις Tinkercad.'
+    },
+    techStack: ['Arduino', 'Tinkercad'],
+    link: 'https://github.com/panagiotisvionis/Arduino---Tinkercad-Circuit-Projects'
+  },
+  {
+    id: 'mycenae-app',
+    title: { en: 'Mycenae Educational App', el: 'Εκπαιδευτική Εφαρμογή Μυκηνών' },
+    category: { en: 'Mobile App', el: 'Εφαρμογή Κινητού' },
+    year: '2025',
+    image: 'https://images.unsplash.com/photo-1515879218367-8466d910aaa4?q=80&w=1000&auto=format&fit=crop',
+    description: {
+      en: 'Android app with visuals, audio, and web content on ancient Mycenae.',
+      el: 'Android εφαρμογή με οπτικό υλικό, ήχο και web περιεχόμενο για τις Μυκήνες.'
+    },
+    techStack: ['MIT App Inventor', 'Android'],
+    link: 'https://github.com/panagiotisvionis/Mycenae_Project_App_Invertor'
+  },
+  {
+    id: 'climate-change-app',
+    title: { en: 'Climate Change App', el: 'Εφαρμογή Κλιματικής Αλλαγής' },
+    category: { en: 'Mobile App', el: 'Εφαρμογή Κινητού' },
+    year: '2025',
+    image: 'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?q=80&w=1000&auto=format&fit=crop',
+    description: {
+      en: 'Android app promoting climate change awareness and education.',
+      el: 'Android εφαρμογή ενημέρωσης και εκπαίδευσης για την κλιματική αλλαγή.'
+    },
+    techStack: ['MIT App Inventor', 'Android'],
+    link: 'https://github.com/panagiotisvionis/Climate_Change_App_Invertor'
+  },
+  {
+    id: 'nft-smart-contracts',
+    title: { en: 'NFT Smart Contracts', el: 'NFT Smart Contracts' },
+    category: { en: 'Web3 Development', el: 'Web3 Ανάπτυξη' },
+    year: '2025',
+    image: 'https://images.unsplash.com/photo-1639762681485-074b7f938ba0?q=80&w=1000&auto=format&fit=crop',
+    description: {
+      en: 'Development, testing, and deployment of Ethereum NFT contracts.',
+      el: 'Ανάπτυξη, δοκιμή και ανάπτυξη NFT συμβολαίων στο Ethereum.'
+    },
+    techStack: ['Solidity', 'Hardhat', 'JavaScript'],
+    link: 'https://github.com/panagiotisvionis/NFT-Smart-Contract-Project'
+  },
+  {
+    id: 'open-api',
+    title: { en: 'Prime Factorization API', el: 'API Παραγοντοποίησης' },
+    category: { en: 'Backend API', el: 'Backend API' },
+    year: '2025',
+    image: 'https://images.unsplash.com/photo-1555949963-aa79dcee981c?q=80&w=1000&auto=format&fit=crop',
+    description: {
+      en: 'Flask API with OpenAPI 3.0 documentation for prime factorization.',
+      el: 'API σε Flask με τεκμηρίωση OpenAPI 3.0 για παραγοντοποίηση.'
+    },
+    techStack: ['Python', 'Flask', 'OpenAPI'],
+    link: 'https://github.com/panagiotisvionis/Open-Api'
+  },
+  {
+    id: 'robot-room-navigation',
+    title: { en: 'Robot Room Navigation', el: 'Robot Room Navigation' },
+    category: { en: 'Robotics', el: 'Ρομποτική' },
+    year: '2025',
+    image: 'https://images.unsplash.com/photo-1485827404703-89b55fcc595e?q=80&w=1000&auto=format&fit=crop',
+    description: {
+      en: 'Arduino-based robot with corridor-following and room-exit modes.',
+      el: 'Ρομπότ με Arduino και λειτουργίες ακολουθίας διαδρόμου/εξόδου δωματίου.'
+    },
+    techStack: ['C++', 'Arduino'],
+    link: 'https://github.com/panagiotisvionis/RobotRoomNavigation'
+  },
+  {
+    id: 'rec-dapp-ethereum',
+    title: { en: 'REC DApp (Ethereum)', el: 'REC DApp (Ethereum)' },
+    category: { en: 'Web3 Development', el: 'Web3 Ανάπτυξη' },
+    year: '2025',
     image: 'https://images.unsplash.com/photo-1621504450181-5d356f63d3ee?q=80&w=1000&auto=format&fit=crop',
-    description: 'Scientific review on the application of blockchain and smart contracts in the energy sector.',
-    techStack: ['Research', 'Smart Contracts', 'Energy'],
+    description: {
+      en: 'Decentralized app prototype for Renewable Energy Certificates on Ethereum.',
+      el: 'Πρωτότυπο DApp για Ανανεώσιμα Πιστοποιητικά Ενέργειας στο Ethereum.'
+    },
+    techStack: ['Solidity', 'Truffle', 'JavaScript'],
+    link: 'https://github.com/panagiotisvionis/REC_Dapp_Ethereum'
+  },
+  {
+    id: 'rec-dapp-solana',
+    title: { en: 'REC DApp (Solana)', el: 'REC DApp (Solana)' },
+    category: { en: 'Web3 Development', el: 'Web3 Ανάπτυξη' },
+    year: '2024',
+    image: 'https://images.unsplash.com/photo-1644018335954-ab54c83e007f?q=80&w=1000&auto=format&fit=crop',
+    description: {
+      en: 'Solana DApp prototype using Rust and Anchor for REC workflows.',
+      el: 'DApp σε Solana με Rust και Anchor για διαδικασίες REC.'
+    },
+    techStack: ['Rust', 'Anchor', 'Solana'],
+    link: 'https://github.com/panagiotisvionis/REC_Dapp_Solana'
+  },
+  {
+    id: 'wallet-integration',
+    title: { en: 'Wallet Integration', el: 'Wallet Integration' },
+    category: { en: 'Web3 Integration', el: 'Web3 Ενσωμάτωση' },
+    year: '2024',
+    image: 'https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?q=80&w=1000&auto=format&fit=crop',
+    description: {
+      en: 'Wallet connection experiments for Ethereum-based apps.',
+      el: 'Δοκιμές σύνδεσης wallet για εφαρμογές Ethereum.'
+    },
+    techStack: ['JavaScript', 'Web3'],
+    link: 'https://github.com/panagiotisvionis/Wallet-Integration'
+  },
+  {
+    id: 'blockchain-review',
+    title: {
+      en: 'Blockchain in Energy Review',
+      el: 'Ανασκόπηση Blockchain στην Ενέργεια'
+    },
+    category: { en: 'Scientific Publication', el: 'Επιστημονική Δημοσίευση' },
+    year: '2024',
+    image: 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=1000&auto=format&fit=crop',
+    description: {
+      en: 'Review paper on blockchain technology and smart contracts in energy.',
+      el: 'Μελέτη ανασκόπησης για blockchain και smart contracts στην ενέργεια.'
+    },
+    techStack: ['Research', 'Blockchain'],
     link: 'https://doi.org/10.3390/app14010253'
-  },
-  { 
-    id: '6', 
-    title: 'Quantitative Methods', 
-    category: 'Teaching Portfolio', 
-    year: '2023', 
-    image: 'https://images.unsplash.com/photo-1509228468518-180dd48a579a?q=80&w=1000&auto=format&fit=crop',
-    description: 'Curriculum development and statistical instruction at the University of Peloponnese.',
-    techStack: ['Statistics', 'Mathematics', 'SPSS'],
-    link: '#'
-  },
+  }
 ];
 
 const SKILLS = [
   { name: 'Solidity', icon: Binary },
   { name: 'Rust', icon: Cpu },
   { name: 'Python', icon: Code },
-  { name: 'React/TS', icon: Layers },
+  { name: 'Web3', icon: Globe },
   { name: 'SQL/NoSQL', icon: Database },
-  { name: 'ERP Systems', icon: Terminal },
+  { name: 'ERP', icon: Terminal },
 ];
+
+const COPY = {
+  en: {
+    nav: { work: 'Work', skills: 'Skills', education: 'Profile' },
+    buttons: {
+      contact: 'Contact',
+      email: 'Email Me',
+      viewProject: 'View Project',
+      language: 'EN / GR'
+    },
+    hero: {
+      location: 'Based in Kalamata',
+      role: 'PhD Candidate & Solution Engineer',
+      headline: 'Architecting the future of Blockchain & Enterprise ERP.',
+      subline: 'R&D Specialist at Kipos tis Lysos | Ph.D. Researcher at UoP.'
+    },
+    work: { title: 'Portfolio', accent: 'Selection' },
+    education: {
+      title: 'Experience',
+      subtitle: 'Career & Academia',
+      educationTitle: 'Education',
+      experienceTitle: 'Professional Experience',
+      talksTitle: 'Selected Talks / Presentations',
+      inProgressTitle: 'In Progress',
+      skillsTitle: 'Technical Skills',
+      researchTitle: 'Research Interests',
+      publicationsTitle: 'Scientific Publications',
+      additionalProjectsTitle: 'Additional Projects',
+      developmentTitle: 'Professional Development'
+    },
+    footer: {
+      title: 'PANAGIOTIS VIONIS',
+      subtitle: 'Solution Engineer & PhD Researcher.',
+      location: 'Kalamata, Greece.',
+      copyright: '2025 Panagiotis Vionis - Digital Portfolio'
+    }
+  },
+  el: {
+    nav: { work: 'ΕΡΓΑ', skills: 'ΔΕΞΙΟΤΗΤΕΣ', education: 'ΠΡΟΦΙΛ' },
+    buttons: {
+      contact: 'ΕΠΙΚΟΙΝΩΝΙΑ',
+      email: 'ΣΤΕΙΛΕ EMAIL',
+      viewProject: 'ΠΡΟΒΟΛΗ PROJECT',
+      language: 'GR / EN'
+    },
+    hero: {
+      location: 'ΒΑΣΗ: ΚΑΛΑΜΑΤΑ',
+      role: 'ΥΠΟΨ. ΔΙΔΑΚΤΟΡΑΣ & SOLUTION ENGINEER',
+      headline: 'Σχεδιάζοντας το μέλλον του Blockchain και του ERP.',
+      subline: 'R&D Specialist στο Kipos tis Lysos | Υποψ. Διδάκτορας στο ΠΠ.'
+    },
+    work: { title: 'Portfolio', accent: 'ΕΠΙΛΕΓΜΕΝΑ' },
+    education: {
+      title: 'ΕΜΠΕΙΡΙΑ',
+      subtitle: 'ΚΑΡΙΕΡΑ & ΑΚΑΔΗΜΑΪΚΑ',
+      educationTitle: 'ΣΠΟΥΔΕΣ',
+      experienceTitle: 'ΕΠΑΓΓΕΛΜΑΤΙΚΗ ΕΜΠΕΙΡΙΑ',
+      talksTitle: 'ΟΜΙΛΙΕΣ / ΠΑΡΟΥΣΙΑΣΕΙΣ',
+      inProgressTitle: 'ΣΕ ΕΞΕΛΙΞΗ',
+      skillsTitle: 'ΤΕΧΝΙΚΕΣ ΔΕΞΙΟΤΗΤΕΣ',
+      researchTitle: 'ΕΡΕΥΝΗΤΙΚΑ ΕΝΔΙΑΦΕΡΟΝΤΑ',
+      publicationsTitle: 'ΕΠΙΣΤΗΜΟΝΙΚΕΣ ΔΗΜΟΣΙΕΥΣΕΙΣ',
+      additionalProjectsTitle: 'ΕΠΙΠΛΕΟΝ PROJECTS',
+      developmentTitle: 'ΕΠΑΓΓΕΛΜΑΤΙΚΗ ΑΝΑΠΤΥΞΗ'
+    },
+    footer: {
+      title: 'ΠΑΝΑΓΙΩΤΗΣ ΒΙΩΝΗΣ',
+      subtitle: 'Solution Engineer & Υποψ. Διδάκτορας.',
+      location: 'Καλαμάτα, Ελλάδα.',
+      copyright: '2025 Panagiotis Vionis - Digital Portfolio'
+    }
+  }
+};
+
+const CV = {
+  education: [
+    {
+      year: '2022 - Now',
+      title: {
+        en: 'Ph.D. Candidate in Blockchain Technology',
+        el: 'Υποψήφιος Διδάκτορας στην Τεχνολογία Blockchain'
+      },
+      org: {
+        en: 'University of Peloponnese, Department of Business Administration',
+        el: 'Πανεπιστήμιο Πελοποννήσου, Τμήμα Διοίκησης Επιχειρήσεων'
+      },
+      detail: {
+        en: 'Focus: "The Application of Blockchain Technology and Smart Contracts in the Energy Sector". Supervising committee: Ass. Prof. Theodore Kotsilieris (UoP), Prof. Ioannis Dimopoulos (UoP), Prof. Eustratios Georgopoulos (UoP).',
+        el: 'Εστίαση: "Η Εφαρμογή της Τεχνολογίας Blockchain και των Smart Contracts στον Ενεργειακό Τομέα". Επιβλέπουσα επιτροπή: Αν. Καθ. Θεόδωρος Κοτσιλιέρης (ΠΠ), Καθ. Ιωάννης Δημόπουλος (ΠΠ), Καθ. Ευστράτιος Γεωργόπουλος (ΠΠ).'
+      }
+    },
+    {
+      year: '2020 - 2022',
+      title: {
+        en: 'M.Sc. in Technoeconomic Management Systems',
+        el: 'M.Sc. στη Διοίκηση Τεχνοοικονομικών Συστημάτων'
+      },
+      org: {
+        en: 'University of Peloponnese, Department of Business Administration',
+        el: 'Πανεπιστήμιο Πελοποννήσου, Τμήμα Διοίκησης Επιχειρήσεων'
+      },
+      detail: {
+        en: 'Thesis: "Blockchain Technology in Public Administration - An Approach for the Ministry of Transport".',
+        el: 'Διπλωματική: "Τεχνολογία Blockchain στη Δημόσια Διοίκηση - Προσέγγιση για το Υπουργείο Μεταφορών".'
+      }
+    },
+    {
+      year: '2002 - 2008',
+      title: {
+        en: 'B.Sc. in Mathematics',
+        el: 'Πτυχίο στα Μαθηματικά'
+      },
+      org: {
+        en: 'University of Patras, Department of Mathematics',
+        el: 'Πανεπιστήμιο Πατρών, Τμήμα Μαθηματικών'
+      },
+      detail: {
+        en: 'Undergraduate studies in Mathematics.',
+        el: 'Προπτυχιακές σπουδές στα Μαθηματικά.'
+      }
+    }
+  ],
+  experience: [
+    {
+      year: '2023 - Now',
+      title: {
+        en: 'Instructor of Quantitative Methods',
+        el: 'Διδάσκων Ποσοτικών Μεθόδων'
+      },
+      org: {
+        en: 'University of Peloponnese, Department of Business Administration',
+        el: 'Πανεπιστήμιο Πελοποννήσου, Τμήμα Διοίκησης Επιχειρήσεων'
+      },
+      bullets: [
+        { en: 'Quantitative Analysis and Statistical Techniques', el: 'Ποσοτική Ανάλυση και Στατιστικές Τεχνικές' },
+        { en: 'Data-Driven Decision Making', el: 'Λήψη Αποφάσεων βάσει Δεδομένων' },
+        { en: 'Curriculum Development and Innovation', el: 'Ανάπτυξη και Καινοτομία Προγράμματος Σπουδών' }
+      ]
+    },
+    {
+      year: '2023',
+      title: {
+        en: 'Research and Development Team Member',
+        el: 'Μέλος Ομάδας Έρευνας και Ανάπτυξης'
+      },
+      org: {
+        en: 'University of Peloponnese, Department of Business Administration',
+        el: 'Πανεπιστήμιο Πελοποννήσου, Τμήμα Διοίκησης Επιχειρήσεων'
+      },
+      bullets: [
+        { en: 'Innovative Blockchain Solutions', el: 'Καινοτόμες Λύσεις Blockchain' },
+        { en: 'Smart Contract Development and Optimization', el: 'Ανάπτυξη και Βελτιστοποίηση Smart Contracts' },
+        { en: 'Decentralized Application (DApp) Development', el: 'Ανάπτυξη Αποκεντρωμένων Εφαρμογών (DApps)' },
+        { en: 'Web Development with HTML and CSS', el: 'Web Development με HTML και CSS' },
+        { en: 'Algorithm Design and Analysis', el: 'Σχεδίαση και Ανάλυση Αλγορίθμων' },
+        { en: 'Statistical Analysis and Discrete Mathematics', el: 'Στατιστική Ανάλυση και Διακριτά Μαθηματικά' },
+        { en: 'Cross-Disciplinary Collaboration and Thought Leadership', el: 'Διεπιστημονική Συνεργασία και Ερευνητική Καθοδήγηση' }
+      ]
+    },
+    {
+      year: '2021 - 2023',
+      title: {
+        en: 'Computer Science Tutor',
+        el: 'Καθηγητής Πληροφορικής'
+      },
+      org: { en: 'IEK Delta, Kalamata', el: 'ΙΕΚ Δέλτα, Καλαμάτα' },
+      bullets: [
+        { en: 'Databases (SQL/NoSQL)', el: 'Βάσεις Δεδομένων (SQL/NoSQL)' },
+        { en: 'Python Programming', el: 'Προγραμματισμός σε Python' },
+        { en: 'Data Analysis and Automation', el: 'Ανάλυση Δεδομένων και Αυτοματισμοί' }
+      ]
+    },
+    {
+      year: '2008 -',
+      title: { en: 'Mathematics Tutor', el: 'Καθηγητής Μαθηματικών' },
+      org: { en: 'Private Practice', el: 'Ιδιαίτερα Μαθήματα' },
+      bullets: [
+        { en: 'Statistics, Calculus, Algebra, Geometry', el: 'Στατιστική, Ανάλυση, Άλγεβρα, Γεωμετρία' },
+        { en: 'Discrete Mathematics', el: 'Διακριτά Μαθηματικά' }
+      ]
+    }
+  ],
+  talks: [
+    {
+      year: '2023',
+      title: {
+        en: '2nd Student Conference, Department of Accounting and Finance, University of Peloponnese',
+        el: '2ο Φοιτητικό Συνέδριο, Τμήμα Λογιστικής και Χρηματοοικονομικής, Πανεπιστήμιο Πελοποννήσου'
+      },
+      detail: {
+        en: '"The Potential of Blockchain Application in Enhancing Efficiency and Transparency in Public Administration with Emphasis on the Energy Sector."',
+        el: '"Το δυναμικό της εφαρμογής του Blockchain στην ενίσχυση της αποδοτικότητας και της διαφάνειας στη Δημόσια Διοίκηση με έμφαση στον Ενεργειακό Τομέα."'
+      }
+    }
+  ],
+  inProgress: [
+    { en: 'Ethereum and Solidity: The Complete Developers Guide — Stephen Grider (Udemy)', el: 'Ethereum and Solidity: The Complete Developers Guide — Stephen Grider (Udemy)' },
+    { en: 'Learn Blockchain, Solidity and Full Stack Web3 Development with JavaScript — Patrick Collins (YouTube)', el: 'Learn Blockchain, Solidity and Full Stack Web3 Development with JavaScript — Patrick Collins (YouTube)' },
+    { en: 'Code Your Own Cryptocurrency on Ethereum — Gregory McCubbin (Udemy)', el: 'Code Your Own Cryptocurrency on Ethereum — Gregory McCubbin (Udemy)' },
+    { en: 'Python for Data Science and Machine Learning Bootcamp — Jose Portilla (Udemy)', el: 'Python for Data Science and Machine Learning Bootcamp — Jose Portilla (Udemy)' },
+    { en: 'Jira Agile Project Management — Paul Ashun (Udemy)', el: 'Jira Agile Project Management — Paul Ashun (Udemy)' }
+  ],
+  skills: [
+    { en: 'Operating Systems: Windows, Ubuntu', el: 'Λειτουργικά Συστήματα: Windows, Ubuntu' },
+    { en: 'Programming: Python, Solidity, Rust, HTML5, CSS, JavaScript', el: 'Προγραμματισμός: Python, Solidity, Rust, HTML5, CSS, JavaScript' },
+    { en: 'RDBMS: MySQL', el: 'RDBMS: MySQL' },
+    { en: 'NRDBMS: MongoDB', el: 'NRDBMS: MongoDB' },
+    { en: 'IDEs/Frameworks: Remix, Truffle, EVM, Anchor, PyCharm, VSCode', el: 'IDEs/Frameworks: Remix, Truffle, EVM, Anchor, PyCharm, VSCode' },
+    { en: 'Agile tools: Jira, Confluence', el: 'Agile εργαλεία: Jira, Confluence' }
+  ],
+  research: [
+    { en: 'Blockchain', el: 'Blockchain' },
+    { en: 'Smart Contracts', el: 'Smart Contracts' },
+    { en: 'DApps', el: 'DApps' },
+    { en: 'Web3', el: 'Web3' },
+    { en: 'AI', el: 'AI' },
+    { en: 'Deep Learning', el: 'Deep Learning' },
+    { en: 'Machine Learning', el: 'Machine Learning' },
+    { en: 'IoT', el: 'IoT' }
+  ],
+  publications: [
+    {
+      year: '2024',
+      title: {
+        en: 'The Potential of Blockchain Technology and Smart Contracts in the Energy Sector: A Review',
+        el: 'The Potential of Blockchain Technology and Smart Contracts in the Energy Sector: A Review'
+      },
+      detail: {
+        en: 'Vionis, P.; Kotsilieris, T. Appl. Sci. 2024, 14, 253.',
+        el: 'Vionis, P.; Kotsilieris, T. Appl. Sci. 2024, 14, 253.'
+      },
+      link: 'https://doi.org/10.3390/app14010253'
+    },
+    {
+      year: '2025',
+      title: {
+        en: 'Revolutionizing REC management: comparative study of Solana and Ethereum blockchain implementations',
+        el: 'Revolutionizing REC management: comparative study of Solana and Ethereum blockchain implementations'
+      },
+      detail: {
+        en: 'Vionis, P.; Livieris, I. E.; Kotsilieris, T. Electrical Engineering (2026) 108:69. Published 20 Dec 2025.',
+        el: 'Vionis, P.; Livieris, I. E.; Kotsilieris, T. Electrical Engineering (2026) 108:69. Δημοσίευση 20 Δεκ 2025.'
+      },
+      link: 'https://link.springer.com/article/10.1007/s00202-025-03402-2'
+    }
+  ],
+  additionalProjects: [
+    {
+      year: '2024',
+      detail: {
+        en: 'Developed a decentralized application (DApp) using Rust and the Anchor framework on the Solana network (Ubuntu).',
+        el: 'Ανάπτυξη αποκεντρωμένης εφαρμογής (DApp) με Rust και Anchor στο Solana (Ubuntu).'
+      },
+      link: 'https://github.com/panagiotisvionis/REC_Dapp_Solana'
+    },
+    {
+      year: '2023',
+      detail: {
+        en: 'Developed a decentralized application (DApp) using Solidity and the Truffle framework on Ethereum Sepolia testnet.',
+        el: 'Ανάπτυξη αποκεντρωμένης εφαρμογής (DApp) με Solidity και Truffle στο Ethereum Sepolia testnet.'
+      },
+      link: 'https://github.com/panagiotisvionis/REC_Dapp_Ethereum'
+    }
+  ],
+  development: [
+    {
+      date: '04/2024',
+      title: {
+        en: 'Blockchain Developer Bootcamp with Rust + JavaScript',
+        el: 'Blockchain Developer Bootcamp με Rust + JavaScript'
+      },
+      provider: { en: 'Learn With Arjun, Udemy', el: 'Learn With Arjun, Udemy' },
+      bullets: ['Web3', 'DApps', 'NFTs', 'DeFi', 'React', 'Anchor', 'Mocha']
+    },
+    {
+      date: '09/2023',
+      title: { en: 'Building an Ethereum Blockchain App', el: 'Building an Ethereum Blockchain App' },
+      provider: { en: 'Michael Solomon, LinkedIn', el: 'Michael Solomon, LinkedIn' },
+      bullets: ['Ethereum Virtual Machine (EVM)', 'Ethereum Wallets', 'Ganache', 'Truffle', 'Solidity']
+    },
+    {
+      date: '09/2023',
+      title: { en: 'Blockchain and Smart Contract Security', el: 'Blockchain and Smart Contract Security' },
+      provider: { en: 'Sam Sehgal, LinkedIn', el: 'Sam Sehgal, LinkedIn' },
+      bullets: [
+        'Proof of Work protocol attacks',
+        'Proof of Stake protocol attacks',
+        'Smart Contract Threats',
+        'Secure Design',
+        'Blockchain Ecosystem Threats'
+      ]
+    },
+    {
+      date: '09/2023',
+      title: { en: 'Smart Contract Developer Full Course', el: 'Smart Contract Developer Full Course' },
+      provider: { en: 'Freshman, LearnWeb3.io', el: 'Freshman, LearnWeb3.io' },
+      bullets: ['Solidity', 'ERC 20', 'ERC 721', 'Hardhat']
+    }
+  ]
+};
+
 
 const App: React.FC = () => {
   const { scrollYProgress } = useScroll();
   const y = useTransform(scrollYProgress, [0, 1], [0, -100]);
   const opacity = useTransform(scrollYProgress, [0, 0.2], [1, 0]);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [language, setLanguage] = useState<Language>('en');
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
+  const t = COPY[language];
+  const projects: Project[] = PROJECT_DATA.map((project) => ({
+    ...project,
+    title: project.title[language],
+    category: project.category[language],
+    description: project.description[language]
+  }));
 
   const scrollToSection = (id: string) => {
     setMobileMenuOpen(false);
@@ -103,6 +550,12 @@ const App: React.FC = () => {
       window.scrollTo({ top: offsetPosition, behavior: 'smooth' });
     }
   };
+
+  const navItems = [
+    { id: 'work', label: t.nav.work },
+    { id: 'skills', label: t.nav.skills },
+    { id: 'education', label: t.nav.education }
+  ];
   
   return (
     <div className="relative min-h-screen text-white selection:bg-[#4fb7b3] selection:text-black cursor-auto md:cursor-none overflow-x-hidden bg-[#1a1b3b]">
@@ -115,24 +568,33 @@ const App: React.FC = () => {
         <div className="font-heading text-xl md:text-2xl font-bold tracking-tighter text-white cursor-default z-50">PANAGIOTIS VIONIS</div>
         
         <div className="hidden md:flex gap-10 text-sm font-bold tracking-widest uppercase">
-          {['Work', 'Skills', 'Education'].map((item) => (
-            <button 
-              key={item} 
-              onClick={() => scrollToSection(item.toLowerCase())}
+          {navItems.map((item) => (
+            <button
+              key={item.id}
+              onClick={() => scrollToSection(item.id)}
               className="hover:text-[#a8fbd3] transition-colors text-white cursor-pointer bg-transparent border-none"
               data-hover="true"
             >
-              {item}
+              {item.label}
             </button>
           ))}
         </div>
-        <a 
-          href="mailto:panagiotisvionis@gmail.com"
-          className="hidden md:inline-block border border-white px-8 py-3 text-xs font-bold tracking-widest uppercase hover:bg-white hover:text-black transition-all duration-300 text-white cursor-pointer no-underline"
-          data-hover="true"
-        >
-          Contact
-        </a>
+        <div className="hidden md:flex items-center gap-6">
+          <button
+            onClick={() => setLanguage(language === 'en' ? 'el' : 'en')}
+            className="border border-white/60 px-4 py-2 text-[11px] font-bold tracking-widest uppercase text-white hover:bg-white hover:text-black transition-all duration-300"
+            data-hover="true"
+          >
+            {t.buttons.language}
+          </button>
+          <a
+            href="mailto:panagiotisvionis@gmail.com"
+            className="border border-white px-8 py-3 text-xs font-bold tracking-widest uppercase hover:bg-white hover:text-black transition-all duration-300 text-white cursor-pointer no-underline"
+            data-hover="true"
+          >
+            {t.buttons.contact}
+          </a>
+        </div>
 
         <button 
           className="md:hidden text-white z-50 relative w-10 h-10 flex items-center justify-center"
@@ -151,16 +613,22 @@ const App: React.FC = () => {
             exit={{ opacity: 0, y: -20 }}
             className="fixed inset-0 z-30 bg-[#1a1b3b]/95 backdrop-blur-xl flex flex-col items-center justify-center gap-8 md:hidden"
           >
-            {['Work', 'Skills', 'Education'].map((item) => (
+            {navItems.map((item) => (
               <button
-                key={item}
-                onClick={() => scrollToSection(item.toLowerCase())}
+                key={item.id}
+                onClick={() => scrollToSection(item.id)}
                 className="text-4xl font-heading font-bold text-white hover:text-[#a8fbd3] transition-colors uppercase bg-transparent border-none"
               >
-                {item}
+                {item.label}
               </button>
             ))}
-            <a href="mailto:panagiotisvionis@gmail.com" className="text-xl font-bold text-[#a8fbd3] uppercase tracking-widest">Email Me</a>
+            <button
+              onClick={() => setLanguage(language === 'en' ? 'el' : 'en')}
+              className="text-xl font-bold text-[#a8fbd3] uppercase tracking-widest"
+            >
+              {t.buttons.language}
+            </button>
+            <a href="mailto:panagiotisvionis@gmail.com" className="text-xl font-bold text-[#a8fbd3] uppercase tracking-widest">{t.buttons.email}</a>
           </motion.div>
         )}
       </AnimatePresence>
@@ -174,9 +642,9 @@ const App: React.FC = () => {
             transition={{ duration: 1, delay: 0.2 }}
             className="flex items-center gap-3 text-xs md:text-base font-mono text-[#a8fbd3] tracking-[0.3em] uppercase mb-4 bg-black/20 px-6 py-2 rounded-full backdrop-blur-sm"
           >
-            <span>Based in Kalamata</span>
+            <span>{t.hero.location}</span>
             <span className="w-1.5 h-1.5 bg-[#4fb7b3] rounded-full animate-pulse"/>
-            <span>PhD Candidate & Solution Engineer</span>
+            <span>{t.hero.role}</span>
           </motion.div>
 
           <div className="relative w-full flex justify-center items-center">
@@ -188,8 +656,8 @@ const App: React.FC = () => {
             transition={{ delay: 0.8, duration: 1 }}
             className="text-base md:text-2xl font-light max-w-4xl mx-auto text-white/90 leading-relaxed mt-6"
           >
-            Architecting the future of Blockchain & Enterprise ERP. <br className="hidden md:block"/>
-            R&D Specialist at Kipos tis Lysos | Ph.D. Researcher at UoP.
+            {t.hero.headline} <br className="hidden md:block"/>
+            {t.hero.subline}
           </motion.p>
         </motion.div>
       </header>
@@ -213,13 +681,13 @@ const App: React.FC = () => {
         <div className="max-w-[1600px] mx-auto px-4 md:px-6">
           <div className="flex flex-col md:flex-row justify-between items-end mb-12 md:mb-16">
              <h2 className="text-5xl md:text-8xl font-heading font-bold uppercase leading-[0.9]">
-              Portfolio <br/> 
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#a8fbd3] to-[#4fb7b3]">Selection</span>
+              {t.work.title} <br/>
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#a8fbd3] to-[#4fb7b3]">{t.work.accent}</span>
             </h2>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 border-t border-l border-white/10 bg-black/20 backdrop-blur-sm">
-            {PROJECTS.map((project) => (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 border-t border-l border-white/10 bg-black/20 backdrop-blur-sm">
+            {projects.map((project) => (
               <ProjectCard key={project.id} project={project} onClick={() => setSelectedProject(project)} />
             ))}
           </div>
@@ -229,34 +697,166 @@ const App: React.FC = () => {
       {/* EDUCATION SECTION */}
       <section id="education" className="relative z-10 py-20 md:py-32 px-4 md:px-6 bg-black/10">
         <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-20">
-             <h2 className="text-5xl md:text-9xl font-heading font-bold opacity-20 text-white uppercase">Experience</h2>
-             <p className="text-[#a8fbd3] font-mono uppercase tracking-widest -mt-8 relative z-10 text-sm md:text-base">Career & Academia</p>
+          <div className="text-center mb-16">
+            <h2 className="text-5xl md:text-9xl font-heading font-bold opacity-20 text-white uppercase">{t.education.title}</h2>
+            <p className="text-[#a8fbd3] font-mono uppercase tracking-widest -mt-8 relative z-10 text-sm md:text-base">{t.education.subtitle}</p>
           </div>
-          
-          <div className="space-y-6">
-            {[
-              { year: '2025 - Now', title: 'R&D / Solution Engineer', institution: 'Kipos tis Lysos (KDHΦ ERP)', desc: 'Leading ERP implementation, solution architecture, and R&D initiatives for digital transformation.' },
-              { year: '2023 - 2025', title: 'Instructor of Quantitative Methods', institution: 'University of Peloponnese', desc: 'Curriculum development and delivery of Quantitative Analysis and Statistical Techniques.' },
-              { year: '2022 - Now', title: 'PhD Candidate in Blockchain', institution: 'University of Peloponnese', desc: 'Research focus: Blockchain & Smart Contracts in the Energy Sector (REC Management).' },
-              { year: '2021 - 2023', title: 'Computer Science Tutor', institution: 'IEK Delta', desc: 'Specialized in Databases (SQL/NoSQL), Python, Algorithm Design, and Web Development.' },
-              { year: '2002 - 2008', title: 'B.Sc. in Mathematics', institution: 'University of Patras', desc: 'Graduated from the Department of Mathematics.' },
-            ].map((item, i) => (
-              <motion.div
-                key={i}
-                initial={{ opacity: 0, x: -20 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                viewport={{ once: true }}
-                className="group p-8 border border-white/10 bg-white/5 backdrop-blur-md flex flex-col md:flex-row gap-8 items-center"
-              >
-                <div className="text-xl font-mono font-bold text-[#4fb7b3] md:w-48">{item.year}</div>
-                <div className="flex-1">
-                  <h3 className="text-xl font-heading font-bold mb-2 group-hover:text-[#a8fbd3] transition-colors">{item.title}</h3>
-                  <div className="text-white/60 mb-2 font-bold">{item.institution}</div>
-                  <p className="text-gray-400 text-sm leading-relaxed">{item.desc}</p>
+
+          <div className="space-y-14">
+            <div>
+              <h3 className="text-2xl md:text-3xl font-heading font-bold mb-6 uppercase">{t.education.educationTitle}</h3>
+              <div className="space-y-4">
+                {CV.education.map((item, i) => (
+                  <motion.div
+                    key={i}
+                    initial={{ opacity: 0, x: -20 }}
+                    whileInView={{ opacity: 1, x: 0 }}
+                    viewport={{ once: true }}
+                    className="group p-6 border border-white/10 bg-white/5 backdrop-blur-md flex flex-col md:flex-row gap-6"
+                  >
+                    <div className="text-sm font-mono font-bold text-[#4fb7b3] md:w-40">{item.year}</div>
+                    <div className="flex-1">
+                      <h4 className="text-xl font-heading font-bold mb-2 group-hover:text-[#a8fbd3] transition-colors">{item.title[language]}</h4>
+                      <div className="text-white/60 mb-2 font-bold">{item.org[language]}</div>
+                      <p className="text-gray-400 text-sm leading-relaxed">{item.detail[language]}</p>
+                    </div>
+                  </motion.div>
+                ))}
+              </div>
+            </div>
+
+            <div>
+              <h3 className="text-2xl md:text-3xl font-heading font-bold mb-6 uppercase">{t.education.experienceTitle}</h3>
+              <div className="space-y-4">
+                {CV.experience.map((item, i) => (
+                  <motion.div
+                    key={i}
+                    initial={{ opacity: 0, x: -20 }}
+                    whileInView={{ opacity: 1, x: 0 }}
+                    viewport={{ once: true }}
+                    className="group p-6 border border-white/10 bg-white/5 backdrop-blur-md flex flex-col md:flex-row gap-6"
+                  >
+                    <div className="text-sm font-mono font-bold text-[#4fb7b3] md:w-40">{item.year}</div>
+                    <div className="flex-1">
+                      <h4 className="text-xl font-heading font-bold mb-2 group-hover:text-[#a8fbd3] transition-colors">{item.title[language]}</h4>
+                      <div className="text-white/60 mb-2 font-bold">{item.org[language]}</div>
+                      <ul className="text-gray-300 text-sm leading-relaxed space-y-2">
+                        {item.bullets.map((bullet, idx) => (
+                          <li key={idx} className="flex gap-3">
+                            <span className="mt-2 h-1.5 w-1.5 bg-[#4fb7b3] rounded-full" />
+                            <span>{bullet[language]}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  </motion.div>
+                ))}
+              </div>
+            </div>
+
+            <div className="grid md:grid-cols-2 gap-10">
+              <div>
+                <h3 className="text-xl font-heading font-bold mb-4 uppercase">{t.education.talksTitle}</h3>
+                <div className="space-y-4">
+                  {CV.talks.map((item, i) => (
+                    <div key={i} className="p-5 border border-white/10 bg-white/5 backdrop-blur-md">
+                      <div className="text-sm font-mono text-[#4fb7b3] mb-2">{item.year}</div>
+                      <div className="text-white font-bold mb-2">{item.title[language]}</div>
+                      <p className="text-gray-400 text-sm">{item.detail[language]}</p>
+                    </div>
+                  ))}
                 </div>
-              </motion.div>
-            ))}
+              </div>
+              <div>
+                <h3 className="text-xl font-heading font-bold mb-4 uppercase">{t.education.inProgressTitle}</h3>
+                <ul className="space-y-3 text-gray-300 text-sm">
+                  {CV.inProgress.map((item, i) => (
+                    <li key={i} className="flex gap-3">
+                      <span className="mt-2 h-1.5 w-1.5 bg-[#4fb7b3] rounded-full" />
+                      <span>{item[language]}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+
+            <div className="grid md:grid-cols-2 gap-10">
+              <div>
+                <h3 className="text-xl font-heading font-bold mb-4 uppercase">{t.education.skillsTitle}</h3>
+                <ul className="space-y-3 text-gray-300 text-sm">
+                  {CV.skills.map((item, i) => (
+                    <li key={i} className="flex gap-3">
+                      <span className="mt-2 h-1.5 w-1.5 bg-[#4fb7b3] rounded-full" />
+                      <span>{item[language]}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+              <div>
+                <h3 className="text-xl font-heading font-bold mb-4 uppercase">{t.education.researchTitle}</h3>
+                <div className="flex flex-wrap gap-2">
+                  {CV.research.map((item, i) => (
+                    <span key={i} className="px-3 py-1 bg-white/5 border border-white/10 rounded-full text-xs font-mono text-[#a8fbd3]">
+                      {item[language]}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            <div className="grid md:grid-cols-2 gap-10">
+              <div>
+                <h3 className="text-xl font-heading font-bold mb-4 uppercase">{t.education.publicationsTitle}</h3>
+                <div className="space-y-4">
+                  {CV.publications.map((item, i) => (
+                    <div key={i} className="p-5 border border-white/10 bg-white/5 backdrop-blur-md">
+                      <div className="text-sm font-mono text-[#4fb7b3] mb-2">{item.year}</div>
+                      <div className="text-white font-bold mb-1">{item.title[language]}</div>
+                      <div className="text-gray-400 text-sm mb-2">{item.detail[language]}</div>
+                      <a href={item.link} target="_blank" rel="noopener noreferrer" className="text-[#a8fbd3] text-sm font-mono no-underline hover:text-white">
+                        {item.link}
+                      </a>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              <div>
+                <h3 className="text-xl font-heading font-bold mb-4 uppercase">{t.education.additionalProjectsTitle}</h3>
+                <div className="space-y-4">
+                  {CV.additionalProjects.map((item, i) => (
+                    <div key={i} className="p-5 border border-white/10 bg-white/5 backdrop-blur-md">
+                      <div className="text-sm font-mono text-[#4fb7b3] mb-2">{item.year}</div>
+                      <div className="text-gray-300 text-sm mb-2">{item.detail[language]}</div>
+                      <a href={item.link} target="_blank" rel="noopener noreferrer" className="text-[#a8fbd3] text-sm font-mono no-underline hover:text-white">
+                        {item.link}
+                      </a>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            <div>
+              <h3 className="text-2xl md:text-3xl font-heading font-bold mb-6 uppercase">{t.education.developmentTitle}</h3>
+              <div className="space-y-4">
+                {CV.development.map((item, i) => (
+                  <div key={i} className="p-6 border border-white/10 bg-white/5 backdrop-blur-md">
+                    <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-2">
+                      <div className="text-sm font-mono text-[#4fb7b3]">{item.date}</div>
+                      <div className="text-white/70 text-sm font-mono">{item.provider[language]}</div>
+                    </div>
+                    <div className="text-white font-bold mb-3">{item.title[language]}</div>
+                    <div className="flex flex-wrap gap-2">
+                      {item.bullets.map((bullet) => (
+                        <span key={bullet} className="px-3 py-1 bg-white/5 border border-white/10 rounded-full text-xs font-mono text-[#a8fbd3]">
+                          {bullet}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
         </div>
       </section>
@@ -264,8 +864,8 @@ const App: React.FC = () => {
       <footer className="relative z-10 border-t border-white/10 py-16 bg-black/80 backdrop-blur-xl">
         <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row justify-between items-end gap-8">
           <div>
-             <div className="font-heading text-3xl md:text-4xl font-bold tracking-tighter mb-4 text-white uppercase">PANAGIOTIS VIONIS</div>
-             <p className="text-gray-400 text-sm max-w-sm">Solution Engineer & PhD Researcher. <br/>Kalamata, Greece.</p>
+             <div className="font-heading text-3xl md:text-4xl font-bold tracking-tighter mb-4 text-white uppercase">{t.footer.title}</div>
+             <p className="text-gray-400 text-sm max-w-sm">{t.footer.subtitle} <br/>{t.footer.location}</p>
           </div>
           <div className="flex gap-8">
             <a href="https://github.com/panagiotisvionis" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-white font-bold uppercase text-xs tracking-widest transition-colors no-underline">GitHub</a>
@@ -273,7 +873,7 @@ const App: React.FC = () => {
             <a href="mailto:panagiotisvionis@gmail.com" className="text-gray-400 hover:text-white font-bold uppercase text-xs tracking-widest transition-colors no-underline">Email</a>
           </div>
         </div>
-        <div className="mt-12 text-center text-[10px] text-white/20 uppercase tracking-[0.5em]">© 2025 Panagiotis Vionis - Digital Portfolio</div>
+        <div className="mt-12 text-center text-[10px] text-white/20 uppercase tracking-[0.5em]">© {t.footer.copyright}</div>
       </footer>
 
       {/* Project Detail Modal */}
@@ -323,7 +923,7 @@ const App: React.FC = () => {
                     rel="noopener noreferrer"
                     className="flex items-center gap-2 text-white font-bold uppercase tracking-widest hover:text-[#4fb7b3] transition-colors no-underline group"
                   >
-                    View Live Project <ExternalLink className="w-4 h-4 group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />
+                    {t.buttons.viewProject} <ExternalLink className="w-4 h-4 group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />
                   </a>
                 )}
               </div>
