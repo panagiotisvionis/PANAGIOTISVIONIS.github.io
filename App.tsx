@@ -552,9 +552,10 @@ const App: React.FC = () => {
   };
 
   const navItems = [
-    { id: 'work', label: t.nav.work },
+    { id: 'work', label: t.work.title },
     { id: 'skills', label: t.nav.skills },
-    { id: 'education', label: t.nav.education }
+    { id: 'education', label: t.education.educationTitle },
+    { id: 'education-experience', label: t.education.experienceTitle }
   ];
   
   return (
@@ -704,7 +705,7 @@ const App: React.FC = () => {
 
           <div className="space-y-14">
             <div>
-              <h3 className="text-2xl md:text-3xl font-heading font-bold mb-6 uppercase">{t.education.educationTitle}</h3>
+              <h3 id="education-studies" className="text-2xl md:text-3xl font-heading font-bold mb-6 uppercase">{t.education.educationTitle}</h3>
               <div className="space-y-4">
                 {CV.education.map((item, i) => (
                   <motion.div
@@ -726,7 +727,7 @@ const App: React.FC = () => {
             </div>
 
             <div>
-              <h3 className="text-2xl md:text-3xl font-heading font-bold mb-6 uppercase">{t.education.experienceTitle}</h3>
+              <h3 id="education-experience" className="text-2xl md:text-3xl font-heading font-bold mb-6 uppercase">{t.education.experienceTitle}</h3>
               <div className="space-y-4">
                 {CV.experience.map((item, i) => (
                   <motion.div
@@ -756,7 +757,7 @@ const App: React.FC = () => {
 
             <div className="grid md:grid-cols-2 gap-10">
               <div>
-                <h3 className="text-xl font-heading font-bold mb-4 uppercase">{t.education.talksTitle}</h3>
+                <h3 id="education-talks" className="text-xl font-heading font-bold mb-4 uppercase">{t.education.talksTitle}</h3>
                 <div className="space-y-4">
                   {CV.talks.map((item, i) => (
                     <div key={i} className="p-5 border border-white/10 bg-white/5 backdrop-blur-md">
@@ -768,7 +769,7 @@ const App: React.FC = () => {
                 </div>
               </div>
               <div>
-                <h3 className="text-xl font-heading font-bold mb-4 uppercase">{t.education.inProgressTitle}</h3>
+                <h3 id="education-in-progress" className="text-xl font-heading font-bold mb-4 uppercase">{t.education.inProgressTitle}</h3>
                 <ul className="space-y-3 text-gray-300 text-sm">
                   {CV.inProgress.map((item, i) => (
                     <li key={i} className="flex gap-3">
@@ -782,7 +783,7 @@ const App: React.FC = () => {
 
             <div className="grid md:grid-cols-2 gap-10">
               <div>
-                <h3 className="text-xl font-heading font-bold mb-4 uppercase">{t.education.skillsTitle}</h3>
+                <h3 id="education-skills" className="text-xl font-heading font-bold mb-4 uppercase">{t.education.skillsTitle}</h3>
                 <ul className="space-y-3 text-gray-300 text-sm">
                   {CV.skills.map((item, i) => (
                     <li key={i} className="flex gap-3">
@@ -793,7 +794,7 @@ const App: React.FC = () => {
                 </ul>
               </div>
               <div>
-                <h3 className="text-xl font-heading font-bold mb-4 uppercase">{t.education.researchTitle}</h3>
+                <h3 id="education-research" className="text-xl font-heading font-bold mb-4 uppercase">{t.education.researchTitle}</h3>
                 <div className="flex flex-wrap gap-2">
                   {CV.research.map((item, i) => (
                     <span key={i} className="px-3 py-1 bg-white/5 border border-white/10 rounded-full text-xs font-mono text-[#a8fbd3]">
@@ -806,7 +807,7 @@ const App: React.FC = () => {
 
             <div className="grid md:grid-cols-2 gap-10">
               <div>
-                <h3 className="text-xl font-heading font-bold mb-4 uppercase">{t.education.publicationsTitle}</h3>
+                <h3 id="education-publications" className="text-xl font-heading font-bold mb-4 uppercase">{t.education.publicationsTitle}</h3>
                 <div className="space-y-4">
                   {CV.publications.map((item, i) => (
                     <div key={i} className="p-5 border border-white/10 bg-white/5 backdrop-blur-md">
@@ -821,7 +822,7 @@ const App: React.FC = () => {
                 </div>
               </div>
               <div>
-                <h3 className="text-xl font-heading font-bold mb-4 uppercase">{t.education.additionalProjectsTitle}</h3>
+                <h3 id="education-projects" className="text-xl font-heading font-bold mb-4 uppercase">{t.education.additionalProjectsTitle}</h3>
                 <div className="space-y-4">
                   {CV.additionalProjects.map((item, i) => (
                     <div key={i} className="p-5 border border-white/10 bg-white/5 backdrop-blur-md">
@@ -837,7 +838,7 @@ const App: React.FC = () => {
             </div>
 
             <div>
-              <h3 className="text-2xl md:text-3xl font-heading font-bold mb-6 uppercase">{t.education.developmentTitle}</h3>
+              <h3 id="education-development" className="text-2xl md:text-3xl font-heading font-bold mb-6 uppercase">{t.education.developmentTitle}</h3>
               <div className="space-y-4">
                 {CV.development.map((item, i) => (
                   <div key={i} className="p-6 border border-white/10 bg-white/5 backdrop-blur-md">
@@ -861,7 +862,7 @@ const App: React.FC = () => {
         </div>
       </section>
 
-      <footer className="relative z-10 border-t border-white/10 py-16 bg-black/80 backdrop-blur-xl">
+      <footer id="contact" className="relative z-10 border-t border-white/10 py-16 bg-black/80 backdrop-blur-xl">
         <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row justify-between items-end gap-8">
           <div>
              <div className="font-heading text-3xl md:text-4xl font-bold tracking-tighter mb-4 text-white uppercase">{t.footer.title}</div>

@@ -49,13 +49,25 @@ export const initializeChat = (): Chat => {
 /**
  * Sends a message to the Gemini API and extracts the text response.
  */
+const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
 export const sendMessageToGemini = async (message: string): Promise<string> => {
-  try {
-    const chat = initializeChat();
-    const response: GenerateContentResponse = await chat.sendMessage({ message });
-    return response.text || "Transmission failure. Please try again.";
-  } catch (error) {
-    console.error("Gemini Error:", error);
-    return "Connection interrupted. CORE is offline.";
+  const chat = initializeChat();
+  const delays = [800, 1600];
+
+  for (let attempt = 0; attempt <= delays.length; attempt += 1) {
+    try {
+      const response: GenerateContentResponse = await chat.sendMessage({ message });
+      return response.text || "Transmission failure. Please try again.";
+    } catch (error) {
+      console.error("Gemini Error:", error);
+      if (attempt < delays.length) {
+        await sleep(delays[attempt]);
+        continue;
+      }
+      return "Connection interrupted. CORE is offline.";
+    }
   }
+
+  return "Connection interrupted. CORE is offline.";
 };
