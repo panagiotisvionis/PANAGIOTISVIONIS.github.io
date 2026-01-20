@@ -43,7 +43,7 @@ const PROJECT_DATA: Array<{
   },
   {
     id: 'portfolio-site',
-    title: { en: 'Personal Portfolio Site', el: 'Προσωπικό Portfolio Site' },
+    title: { en: 'Personal Portfolio Site', el: 'Προσωπικό Portfolio' },
     category: { en: 'Web Experience', el: 'Web Experience' },
     year: '2025',
     image: 'https://images.unsplash.com/photo-1498050108023-c5249f4df085?q=80&w=1000&auto=format&fit=crop',
@@ -95,8 +95,8 @@ const PROJECT_DATA: Array<{
   },
   {
     id: 'mycenae-app',
-    title: { en: 'Mycenae Educational App', el: 'Εκπαιδευτική Εφαρμογή Μυκηνών' },
-    category: { en: 'Mobile App', el: 'Εφαρμογή Κινητού' },
+    title: { en: 'Mycenae Educational App', el: 'Εκπαιδευτική Εφαρμογή για τις Μυκήνες' },
+    category: { en: 'Mobile App', el: 'Εφαρμογή για Κινητά' },
     year: '2025',
     image: 'https://images.unsplash.com/photo-1515879218367-8466d910aaa4?q=80&w=1000&auto=format&fit=crop',
     description: {
@@ -108,7 +108,7 @@ const PROJECT_DATA: Array<{
   },
   {
     id: 'climate-change-app',
-    title: { en: 'Climate Change App', el: 'Εφαρμογή Κλιματικής Αλλαγής' },
+    title: { en: 'Climate Change App', el: 'Εφαρμογή για την Κλιματική Αλλαγή' },
     category: { en: 'Mobile App', el: 'Εφαρμογή Κινητού' },
     year: '2025',
     image: 'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?q=80&w=1000&auto=format&fit=crop',
@@ -235,9 +235,9 @@ const COPY = {
     },
     hero: {
       location: 'Based in Kalamata',
-      role: 'PhD Candidate & Solution Engineer',
-      headline: 'Architecting the future of Blockchain & Enterprise ERP.',
-      subline: 'R&D Specialist at Kipos tis Lysos | Ph.D. Researcher at UoP.'
+      role: 'R&D & Solution Engineer',
+      headline: 'Architecting the future of Blockchain, AI & Enterprise ERP.',
+      subline: 'R&D Specialist at Lysos Garden | Researcher at University of Peloponnese.'
     },
     work: { title: 'Portfolio', accent: 'Selection' },
     education: {
@@ -254,43 +254,43 @@ const COPY = {
       developmentTitle: 'Professional Development'
     },
     footer: {
-      title: 'PANAGIOTIS VIONIS',
-      subtitle: 'Solution Engineer & PhD Researcher.',
+      title: 'Dr Panagiotis Vionis', 
+      subtitle: 'Solution Engineer & Researcher.',
       location: 'Kalamata, Greece.',
       copyright: '2025 Panagiotis Vionis - Digital Portfolio'
     }
   },
   el: {
-    nav: { work: 'ΕΡΓΑ', skills: 'ΔΕΞΙΟΤΗΤΕΣ', education: 'ΠΡΟΦΙΛ' },
+    nav: { work: 'Εργα', skills: 'Δεξιότητες', education: 'Προφίλ' },
     buttons: {
-      contact: 'ΕΠΙΚΟΙΝΩΝΙΑ',
-      email: 'ΣΤΕΙΛΕ EMAIL',
-      viewProject: 'ΠΡΟΒΟΛΗ PROJECT',
+      contact: 'Επικοινωνία',
+      email: 'Στείλε Email',
+      viewProject: 'Προβολή Project',
       language: 'GR / EN'
     },
     hero: {
       location: 'ΒΑΣΗ: ΚΑΛΑΜΑΤΑ',
-      role: 'ΥΠΟΨ. ΔΙΔΑΚΤΟΡΑΣ & SOLUTION ENGINEER',
-      headline: 'Σχεδιάζοντας το μέλλον του Blockchain και του ERP.',
-      subline: 'R&D Specialist στο Kipos tis Lysos | Υποψ. Διδάκτορας στο ΠΠ.'
+      role: 'R&D & SOLUTION ENGINEER',
+      headline: 'Σχεδιάζοντας το μέλλον του Blockchain, της ΑΙ και των συστημάτων ERP.',
+      subline: 'Solution Engineer στον Κήπο της Λυσούς | Διδάκτορας Πανεπιστημίου Πελοποννήσου.'
     },
-    work: { title: 'Portfolio', accent: 'ΕΠΙΛΕΓΜΕΝΑ' },
+    work: { title: 'Portfolio', accent: 'Επιλεγμένα' },
     education: {
-      title: 'ΕΜΠΕΙΡΙΑ',
-      subtitle: 'ΚΑΡΙΕΡΑ & ΑΚΑΔΗΜΑΪΚΑ',
-      educationTitle: 'ΣΠΟΥΔΕΣ',
-      experienceTitle: 'ΕΠΑΓΓΕΛΜΑΤΙΚΗ ΕΜΠΕΙΡΙΑ',
-      talksTitle: 'ΟΜΙΛΙΕΣ / ΠΑΡΟΥΣΙΑΣΕΙΣ',
-      inProgressTitle: 'ΣΕ ΕΞΕΛΙΞΗ',
-      skillsTitle: 'ΤΕΧΝΙΚΕΣ ΔΕΞΙΟΤΗΤΕΣ',
-      researchTitle: 'ΕΡΕΥΝΗΤΙΚΑ ΕΝΔΙΑΦΕΡΟΝΤΑ',
-      publicationsTitle: 'ΕΠΙΣΤΗΜΟΝΙΚΕΣ ΔΗΜΟΣΙΕΥΣΕΙΣ',
-      additionalProjectsTitle: 'ΕΠΙΠΛΕΟΝ PROJECTS',
-      developmentTitle: 'ΕΠΑΓΓΕΛΜΑΤΙΚΗ ΑΝΑΠΤΥΞΗ'
+      title: 'Εμπειρία',
+      subtitle: 'Ακαδημαική Καριέρα',
+      educationTitle: 'Σπουδές',
+      experienceTitle: 'Επαγγελματική Εμπειρία',
+      talksTitle: 'Ομιλίες / Παρουσιάσεις',
+      inProgressTitle: 'Σε Εξέλιξη',
+      skillsTitle: 'Τεχνικές Δεξιότητες',
+      researchTitle: 'Ερευνητικά Ενδιαφέροντα',
+      publicationsTitle: 'Επιστημονικές Δημοσιεύσεις',
+      additionalProjectsTitle: 'Επιπλέον Projects',
+      developmentTitle: 'Επαγγελματική Ανάπτυξη'
     },
     footer: {
-      title: 'ΠΑΝΑΓΙΩΤΗΣ ΒΙΩΝΗΣ',
-      subtitle: 'Solution Engineer & Υποψ. Διδάκτορας.',
+      title: 'Dr Παναγιώτης Βιώνης',
+      subtitle: 'Solution Engineer',
       location: 'Καλαμάτα, Ελλάδα.',
       copyright: '2025 Panagiotis Vionis - Digital Portfolio'
     }
@@ -300,10 +300,10 @@ const COPY = {
 const CV = {
   education: [
     {
-      year: '2022 - Now',
+      year: '2022 - 2026',
       title: {
-        en: 'Ph.D. Candidate in Blockchain Technology',
-        el: 'Υποψήφιος Διδάκτορας στην Τεχνολογία Blockchain'
+        en: 'Ph.D. in Blockchain Technology',
+        el: 'Διδάκτορας στην Τεχνολογία Blockchain'
       },
       org: {
         en: 'University of Peloponnese, Department of Business Administration',
