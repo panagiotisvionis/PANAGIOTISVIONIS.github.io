@@ -246,7 +246,6 @@ const COPY = {
       educationTitle: 'Education',
       experienceTitle: 'Professional Experience',
       talksTitle: 'Selected Talks / Presentations',
-      inProgressTitle: 'In Progress',
       skillsTitle: 'Technical Skills',
       researchTitle: 'Research Interests',
       publicationsTitle: 'Scientific Publications',
@@ -281,7 +280,6 @@ const COPY = {
       educationTitle: 'Σπουδές',
       experienceTitle: 'Επαγγελματική Εμπειρία',
       talksTitle: 'Ομιλίες / Παρουσιάσεις',
-      inProgressTitle: 'Σε Εξέλιξη',
       skillsTitle: 'Τεχνικές Δεξιότητες',
       researchTitle: 'Ερευνητικά Ενδιαφέροντα',
       publicationsTitle: 'Επιστημονικές Δημοσιεύσεις',
@@ -418,13 +416,6 @@ const CV = {
       }
     }
   ],
-  inProgress: [
-    { en: 'Ethereum and Solidity: The Complete Developers Guide — Stephen Grider (Udemy)', el: 'Ethereum and Solidity: The Complete Developers Guide — Stephen Grider (Udemy)' },
-    { en: 'Learn Blockchain, Solidity and Full Stack Web3 Development with JavaScript — Patrick Collins (YouTube)', el: 'Learn Blockchain, Solidity and Full Stack Web3 Development with JavaScript — Patrick Collins (YouTube)' },
-    { en: 'Code Your Own Cryptocurrency on Ethereum — Gregory McCubbin (Udemy)', el: 'Code Your Own Cryptocurrency on Ethereum — Gregory McCubbin (Udemy)' },
-    { en: 'Python for Data Science and Machine Learning Bootcamp — Jose Portilla (Udemy)', el: 'Python for Data Science and Machine Learning Bootcamp — Jose Portilla (Udemy)' },
-    { en: 'Jira Agile Project Management — Paul Ashun (Udemy)', el: 'Jira Agile Project Management — Paul Ashun (Udemy)' }
-  ],
   skills: [
     { en: 'Operating Systems: Windows, Ubuntu', el: 'Λειτουργικά Συστήματα: Windows, Ubuntu' },
     { en: 'Programming: Python, Solidity, Rust, HTML5, CSS, JavaScript', el: 'Προγραμματισμός: Python, Solidity, Rust, HTML5, CSS, JavaScript' },
@@ -488,6 +479,51 @@ const CV = {
     }
   ],
   development: [
+    {
+      date: 'In Progress / Σε Εξέλιξη',
+      title: {
+        en: 'Ethereum and Solidity: The Complete Developers Guide',
+        el: 'Ethereum and Solidity: The Complete Developers Guide'
+      },
+      provider: { en: 'Stephen Grider, Udemy', el: 'Stephen Grider, Udemy' },
+      bullets: []
+    },
+    {
+      date: 'In Progress / Σε Εξέλιξη',
+      title: {
+        en: 'Learn Blockchain, Solidity and Full Stack Web3 Development with JavaScript',
+        el: 'Learn Blockchain, Solidity and Full Stack Web3 Development with JavaScript'
+      },
+      provider: { en: 'Patrick Collins, YouTube', el: 'Patrick Collins, YouTube' },
+      bullets: []
+    },
+    {
+      date: 'In Progress / Σε Εξέλιξη',
+      title: {
+        en: 'Code Your Own Cryptocurrency on Ethereum',
+        el: 'Code Your Own Cryptocurrency on Ethereum'
+      },
+      provider: { en: 'Gregory McCubbin, Udemy', el: 'Gregory McCubbin, Udemy' },
+      bullets: []
+    },
+    {
+      date: 'In Progress / Σε Εξέλιξη',
+      title: {
+        en: 'Python for Data Science and Machine Learning Bootcamp',
+        el: 'Python for Data Science and Machine Learning Bootcamp'
+      },
+      provider: { en: 'Jose Portilla, Udemy', el: 'Jose Portilla, Udemy' },
+      bullets: []
+    },
+    {
+      date: 'In Progress / Σε Εξέλιξη',
+      title: {
+        en: 'Jira Agile Project Management',
+        el: 'Jira Agile Project Management'
+      },
+      provider: { en: 'Paul Ashun, Udemy', el: 'Paul Ashun, Udemy' },
+      bullets: []
+    },
     {
       date: '04/2024',
       title: {
@@ -755,7 +791,7 @@ const App: React.FC = () => {
               </div>
             </div>
 
-            <div className="grid md:grid-cols-2 gap-10">
+            <div className="grid gap-10 md:grid-cols-1">
               <div>
                 <h3 id="education-talks" className="text-xl font-heading font-bold mb-4 uppercase">{t.education.talksTitle}</h3>
                 <div className="space-y-4">
@@ -767,17 +803,6 @@ const App: React.FC = () => {
                     </div>
                   ))}
                 </div>
-              </div>
-              <div>
-                <h3 id="education-in-progress" className="text-xl font-heading font-bold mb-4 uppercase">{t.education.inProgressTitle}</h3>
-                <ul className="space-y-3 text-gray-300 text-sm">
-                  {CV.inProgress.map((item, i) => (
-                    <li key={i} className="flex gap-3">
-                      <span className="mt-2 h-1.5 w-1.5 bg-[#4fb7b3] rounded-full" />
-                      <span>{item[language]}</span>
-                    </li>
-                  ))}
-                </ul>
               </div>
             </div>
 
