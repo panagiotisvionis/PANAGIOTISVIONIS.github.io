@@ -260,11 +260,11 @@ const COPY = {
     }
   },
   el: {
-    nav: { work: 'εργα', skills: 'δεξιότητες', education: 'προφίλ' },
+    nav: { work: 'Έργα', skills: 'Δεξιότητες', education: 'Προφίλ' },
     buttons: {
-      contact: 'Επικοινωνια',
-      email: 'Στειλε Email',
-      viewProject: 'Προβολη Project',
+      contact: 'Επικοινωνία',
+      email: 'Στείλε Email',
+      viewProject: 'Προβολή Project',
       language: 'GR / EN'
     },
     hero: {
@@ -273,7 +273,7 @@ const COPY = {
       headline: 'Σχεδιάζοντας το μέλλον του Blockchain, της ΑΙ και των συστημάτων ERP.',
       subline: 'Solution Engineer στον Κήπο της Λυσούς | Διδάκτορας Πανεπιστημίου Πελοποννήσου.'
     },
-    work: { title: 'Portfolio', accent: 'Επιλεγμένα' },
+    work: { title: 'Portfolio', accent: 'Επιλεγμeνα' },
     education: {
       title: 'Εμπειρια',
       subtitle: 'Ακαδημαικη Καριερα',
@@ -480,7 +480,7 @@ const CV = {
   ],
   development: [
     {
-      date: 'In Progress / Σε Εξέλιξη',
+      date: '10/2025',
       title: {
         en: 'Ethereum and Solidity: The Complete Developers Guide',
         el: 'Ethereum and Solidity: The Complete Developers Guide'
@@ -489,7 +489,7 @@ const CV = {
       bullets: []
     },
     {
-      date: 'In Progress / Σε Εξέλιξη',
+      date: '09/2025',
       title: {
         en: 'Learn Blockchain, Solidity and Full Stack Web3 Development with JavaScript',
         el: 'Learn Blockchain, Solidity and Full Stack Web3 Development with JavaScript'
@@ -498,7 +498,7 @@ const CV = {
       bullets: []
     },
     {
-      date: 'In Progress / Σε Εξέλιξη',
+      date: '06/2025',
       title: {
         en: 'Code Your Own Cryptocurrency on Ethereum',
         el: 'Code Your Own Cryptocurrency on Ethereum'
@@ -507,7 +507,7 @@ const CV = {
       bullets: []
     },
     {
-      date: 'In Progress / Σε Εξέλιξη',
+      date: '05/2025',
       title: {
         en: 'Python for Data Science and Machine Learning Bootcamp',
         el: 'Python for Data Science and Machine Learning Bootcamp'
@@ -516,7 +516,7 @@ const CV = {
       bullets: []
     },
     {
-      date: 'In Progress / Σε Εξέλιξη',
+      date: '05/2025',
       title: {
         en: 'Jira Agile Project Management',
         el: 'Jira Agile Project Management'
