@@ -262,7 +262,7 @@ const COPY = {
   el: {
     nav: { work: 'Έργα', skills: 'Δεξιότητες', education: 'Προφίλ' },
     buttons: {
-      contact: 'Επικοινωνία',
+      contact: 'ΕπικοινωνΙα',
       email: 'Στείλε Email',
       viewProject: 'Προβολή Project',
       language: 'GR / EN'
@@ -277,8 +277,8 @@ const COPY = {
     education: {
       title: 'Εμπειρια',
       subtitle: 'Ακαδημαικη Καριερα',
-      educationTitle: 'Σπουδες',
-      experienceTitle: 'Επαγγελματικη Εμπειρια',
+      educationTitle: 'Σπουδές',
+      experienceTitle: 'Επαγγελματική Εμπειρία',
       talksTitle: 'Ομιλιες / Παρουσιασεις',
       skillsTitle: 'Τεχνικες Δεξιοτητες',
       researchTitle: 'Ερευνητικα Ενδιαφεροντα',
