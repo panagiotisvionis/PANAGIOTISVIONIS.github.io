@@ -260,11 +260,11 @@ const COPY = {
     }
   },
   el: {
-    nav: { work: 'Εργα', skills: 'Δεξιότητες', education: 'Προφίλ' },
+    nav: { work: 'εργα', skills: 'δεξιότητες', education: 'προφίλ' },
     buttons: {
-      contact: 'Επικοινωνία',
-      email: 'Στείλε Email',
-      viewProject: 'Προβολή Project',
+      contact: 'Επικοινωνια',
+      email: 'Στειλε Email',
+      viewProject: 'Προβολη Project',
       language: 'GR / EN'
     },
     hero: {
@@ -275,16 +275,16 @@ const COPY = {
     },
     work: { title: 'Portfolio', accent: 'Επιλεγμένα' },
     education: {
-      title: 'Εμπειρία',
-      subtitle: 'Ακαδημαική Καριέρα',
-      educationTitle: 'Σπουδές',
-      experienceTitle: 'Επαγγελματική Εμπειρία',
-      talksTitle: 'Ομιλίες / Παρουσιάσεις',
-      skillsTitle: 'Τεχνικές Δεξιότητες',
-      researchTitle: 'Ερευνητικά Ενδιαφέροντα',
-      publicationsTitle: 'Επιστημονικές Δημοσιεύσεις',
-      additionalProjectsTitle: 'Επιπλέον Projects',
-      developmentTitle: 'Επαγγελματική Ανάπτυξη'
+      title: 'Εμπειρια',
+      subtitle: 'Ακαδημαικη Καριερα',
+      educationTitle: 'Σπουδες',
+      experienceTitle: 'Επαγγελματικη Εμπειρια',
+      talksTitle: 'Ομιλιες / Παρουσιασεις',
+      skillsTitle: 'Τεχνικες Δεξιοτητες',
+      researchTitle: 'Ερευνητικα Ενδιαφεροντα',
+      publicationsTitle: 'Επιστημονικες Δημοσιευσεις',
+      additionalProjectsTitle: 'Επιπλεον Projects',
+      developmentTitle: 'Επαγγελματικη Αναπτυξη'
     },
     footer: {
       title: 'Dr Παναγιώτης Βιώνης',
