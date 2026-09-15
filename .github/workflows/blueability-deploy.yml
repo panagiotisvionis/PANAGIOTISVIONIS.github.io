@@ -17,32 +17,34 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Apply BlueAbility premium experience
+      - name: Build BlueAbility production experience
         shell: bash
         run: |
           set -euo pipefail
           test -f docs/blueability/premium.css
-          test -f docs/blueability/premium.js
+          for i in 00 01 02 03 04 05 06 07; do test -f ".blueability-deploy/projsb64_${i}"; done
+          cat .blueability-deploy/projsb64_00 .blueability-deploy/projsb64_01 .blueability-deploy/projsb64_02 .blueability-deploy/projsb64_03 .blueability-deploy/projsb64_04 .blueability-deploy/projsb64_05 .blueability-deploy/projsb64_06 .blueability-deploy/projsb64_07 | tr -d '\n\r' | base64 -d > docs/blueability/premium.js
+          echo '37704bf5ca20d5fb1b8aaf89741c14fac519543cbb6fafd729ef5c25c0243c57  docs/blueability/premium.js' | sha256sum -c -
+          echo 'e85ed7da913e465f0113a1e3b466a9ddf17df0bda2e8952a23e9b55e9a74e7a4  docs/blueability/premium.css' | sha256sum -c -
           node --check docs/blueability/premium.js
           python3 - <<'PY'
           from pathlib import Path
           p=Path('docs/blueability/index.html')
           s=p.read_text(encoding='utf-8')
-          css='<link rel="stylesheet" href="./premium.css?v=20260915">'
-          js='<script src="./premium.js?v=20260915"></script>'
-          if css not in s:
-              s=s.replace('</head>',css+'</head>',1)
-          if js not in s:
-              s=s.replace('</body>',js+'</body>',1)
+          s=s.replace('./premium.css?v=20260915','./premium.css?v=20260915pro1')
+          s=s.replace('./premium.js?v=20260915','./premium.js?v=20260915pro1')
           s=s.replace('<span>10 ενότητες</span>','<span>18 ενότητες</span>')
           s=s.replace('Η θάλασσα σε 10 ενότητες.','Η θάλασσα σε 18 ενότητες.')
           p.write_text(s,encoding='utf-8')
           PY
-          grep -q 'premium.css?v=20260915' docs/blueability/index.html
-          grep -q 'premium.js?v=20260915' docs/blueability/index.html
+          grep -q 'premium.css?v=20260915pro1' docs/blueability/index.html
+          grep -q 'premium.js?v=20260915pro1' docs/blueability/index.html
           grep -q 'Η θάλασσα σε 18 ενότητες.' docs/blueability/index.html
           grep -q 'Demo · Μαθητής' docs/blueability/index.html
-          rm -f .blueability-deploy/premium_assets_00 .blueability-deploy/pd_09
+          grep -q 'Κοινότητα BlueAbility' docs/blueability/premium.js
+          grep -q 'join_classroom_by_code' docs/blueability/premium.js
+          grep -q 'Ο Φύλακας της Θάλασσας' docs/blueability/premium.js
+          rm -f .blueability-deploy/projsb64_00 .blueability-deploy/projsb64_01 .blueability-deploy/projsb64_02 .blueability-deploy/projsb64_03 .blueability-deploy/projsb64_04 .blueability-deploy/projsb64_05 .blueability-deploy/projsb64_06 .blueability-deploy/projsb64_07
       - name: Commit production build
         shell: bash
         run: |
@@ -53,5 +55,5 @@ jobs:
             echo 'No deployment change needed.'
             exit 0
           fi
-          git commit -m 'Upgrade BlueAbility premium visuals and content'
+          git commit -m 'Build BlueAbility production learning experience'
           git push
