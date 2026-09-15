@@ -16,7 +16,8 @@ export default defineConfig(({ mode }) => {
       },
       build: {
         outDir: 'docs',
-        emptyOutDir: true
+        // Keep manually deployed static apps such as /docs/blueability intact.
+        emptyOutDir: false
       },
       resolve: {
         alias: {
