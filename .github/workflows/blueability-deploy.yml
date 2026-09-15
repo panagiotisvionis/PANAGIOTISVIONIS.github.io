@@ -15,26 +15,24 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Apply and verify BlueAbility open-registration build
+      - name: Apply and verify BlueAbility admin-role hardening build
         shell: bash
         run: |
           set -euo pipefail
-          BASE_EXPECTED='f7573564023add6c079202f76a47171c7908c31c'
-          FINAL_EXPECTED='7d3dd3916251cd90caa28383ef900223242e73f5'
+          BASE_EXPECTED='7d3dd3916251cd90caa28383ef900223242e73f5'
+          FINAL_EXPECTED='876b386b79519f96c9f9d320113a2285839c2295'
           BASE_ACTUAL="$(git hash-object docs/blueability/index.html)"
           echo "Base expected: $BASE_EXPECTED"
           echo "Base actual:   $BASE_ACTUAL"
           if [ "$BASE_ACTUAL" = "$FINAL_EXPECTED" ]; then
-            echo 'V3 already present.'
+            echo 'V4 already present.'
             exit 0
           fi
           test "$BASE_ACTUAL" = "$BASE_EXPECTED"
-          cat .blueability-deploy/v3patch_00 .blueability-deploy/v3patch_01 | tr -d '\n\r' | base64 -d | gzip -d > /tmp/blueability-v3.patch
-          patch docs/blueability/index.html < /tmp/blueability-v3.patch
-          grep -q 'Ο λογαριασμός ενεργοποιείται αυτόματα' docs/blueability/index.html
-          ! grep -q 'review_access_request' docs/blueability/index.html
-          ! grep -q 'renderWaiting' docs/blueability/index.html
-          ! grep -q 'option value="admin"' docs/blueability/index.html
+          cat .blueability-deploy/v4patch_00 .blueability-deploy/v4patch_01 | tr -d '\n\r' | base64 -d | gzip -d > /tmp/blueability-v4.patch
+          patch docs/blueability/index.html < /tmp/blueability-v4.patch
+          grep -q "if(role()==='org_admin')return organization()" docs/blueability/index.html
+          grep -q 'prefs();showApp();renderNav();if(!p)' docs/blueability/index.html
           FINAL_ACTUAL="$(git hash-object docs/blueability/index.html)"
           echo "Final expected: $FINAL_EXPECTED"
           echo "Final actual:   $FINAL_ACTUAL"
@@ -49,5 +47,5 @@ jobs:
             echo 'No deployment change needed.'
             exit 0
           fi
-          git commit -m 'Deploy BlueAbility open registration'
+          git commit -m 'Deploy BlueAbility admin role fix'
           git push
