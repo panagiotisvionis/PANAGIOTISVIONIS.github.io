@@ -3,7 +3,7 @@ name: Deploy BlueAbility
 on:
   push:
     paths:
-      - '.blueability-deploy/**'
+      - '.blueability-v2/**'
       - '.github/workflows/blueability-deploy.yml'
   workflow_dispatch:
 
@@ -15,32 +15,41 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Rebuild and verify BlueAbility production HTML
+      - name: Apply and verify BlueAbility V2 approval build
         shell: bash
         run: |
-          mkdir -p docs/blueability
-          cat \
-            .blueability-deploy/chunk00.b64 \
-            .blueability-deploy/chunk01.b64 \
-            .blueability-deploy/chunk02.b64 \
-            .blueability-deploy/fix30.b64 \
-            .blueability-deploy/fix31.b64 \
-            .blueability-deploy/fix32.b64 \
-            .blueability-deploy/fix33.b64 \
-            .blueability-deploy/fix40.b64 \
-            .blueability-deploy/fix41.b64 \
-            .blueability-deploy/fix42.b64 \
-            .blueability-deploy/fix43.b64 \
-            .blueability-deploy/chunk05.b64 \
-            | tr -d '\n\r' | base64 -d > docs/blueability/index.html
-          test -s docs/blueability/index.html
-          grep -q 'etnuvuhxxbhvebosicqf' docs/blueability/index.html
-          grep -q 'BlueAbility' docs/blueability/index.html
-          EXPECTED='a69454516915ab86783e7b082fdf16a7c008ccc2'
-          ACTUAL="$(git hash-object docs/blueability/index.html)"
-          echo "Expected blob: $EXPECTED"
-          echo "Actual blob:   $ACTUAL"
-          test "$ACTUAL" = "$EXPECTED"
+          set -euo pipefail
+          APP='docs/blueability/index.html'
+          BASE_EXPECTED='a69454516915ab86783e7b082fdf16a7c008ccc2'
+          FINAL_EXPECTED='f7573564023add6c079202f76a47171c7908c31c'
+          BASE_ACTUAL="$(git hash-object "$APP")"
+          echo "Base expected: $BASE_EXPECTED"
+          echo "Base actual:   $BASE_ACTUAL"
+          test "$BASE_ACTUAL" = "$BASE_EXPECTED"
+
+          cat .blueability-v2/patch00.b64 \
+              .blueability-v2/patch01.b64 \
+              .blueability-v2/patch02.b64 \
+              .blueability-v2/patch03.b64 \
+              .blueability-v2/patch04.b64 \
+            | tr -d '\n\r' | base64 -d > /tmp/blueability-v2.patch.gz
+          echo '5dc5ca56eb3944738bdfb3082c05b820c6f1799e6f4d59070bbc2475687db986  /tmp/blueability-v2.patch.gz' | sha256sum -c -
+          gzip -dc /tmp/blueability-v2.patch.gz > /tmp/blueability-v2.patch
+          patch -p1 < /tmp/blueability-v2.patch
+
+          test -s "$APP"
+          grep -q 'review_access_request' "$APP"
+          grep -q 'account_type' "$APP"
+          grep -q 'approval_status' "$APP"
+          if grep -q '<option value="org_admin"' "$APP"; then
+            echo 'Public signup must never offer org_admin.'
+            exit 1
+          fi
+          FINAL_ACTUAL="$(git hash-object "$APP")"
+          echo "Final expected: $FINAL_EXPECTED"
+          echo "Final actual:   $FINAL_ACTUAL"
+          test "$FINAL_ACTUAL" = "$FINAL_EXPECTED"
+
       - name: Commit production build
         shell: bash
         run: |
@@ -51,5 +60,5 @@ jobs:
             echo 'No deployment change needed.'
             exit 0
           fi
-          git commit -m 'Deploy BlueAbility production app'
+          git commit -m 'Deploy BlueAbility V2 admin approval flow'
           git push
