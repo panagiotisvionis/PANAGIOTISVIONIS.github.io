@@ -15,14 +15,32 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Rebuild BlueAbility production HTML
+      - name: Rebuild and verify BlueAbility production HTML
         shell: bash
         run: |
           mkdir -p docs/blueability
-          cat .blueability-deploy/chunk*.b64 | tr -d '\n\r' | base64 -d > docs/blueability/index.html
+          cat \
+            .blueability-deploy/chunk00.b64 \
+            .blueability-deploy/chunk01.b64 \
+            .blueability-deploy/chunk02.b64 \
+            .blueability-deploy/fix30.b64 \
+            .blueability-deploy/fix31.b64 \
+            .blueability-deploy/fix32.b64 \
+            .blueability-deploy/fix33.b64 \
+            .blueability-deploy/fix40.b64 \
+            .blueability-deploy/fix41.b64 \
+            .blueability-deploy/fix42.b64 \
+            .blueability-deploy/fix43.b64 \
+            .blueability-deploy/chunk05.b64 \
+            | tr -d '\n\r' | base64 -d > docs/blueability/index.html
           test -s docs/blueability/index.html
           grep -q 'etnuvuhxxbhvebosicqf' docs/blueability/index.html
           grep -q 'BlueAbility' docs/blueability/index.html
+          EXPECTED='a69454516915ab86783e7b082fdf16a7c008ccc2'
+          ACTUAL="$(git hash-object docs/blueability/index.html)"
+          echo "Expected blob: $EXPECTED"
+          echo "Actual blob:   $ACTUAL"
+          test "$ACTUAL" = "$EXPECTED"
       - name: Commit production build
         shell: bash
         run: |
