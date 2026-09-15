@@ -1,0 +1,35 @@
+(()=>{
+const U=id=>`https://unsplash.com/photos/${id}/download?force=true&w=1600`;
+const V={
+ hero:U('Uu1CtKngEXY'),
+ biodiversity:U('Uu1CtKngEXY'),
+ reef:U('UtHxGSh8r5o'),
+ coast:U('WYBOow2ekw8'),
+ guardian:U('-GezxTGRL5U'),
+ fishing:U('XEtFmDMUNB0'),
+ field:U('vmzFY0tS8T0'),
+ educator:U('6c86TCPmNRQ'),
+ family:U('0iqkntLw93A')
+};
+const v=(k)=>V[k]||V.hero;
+const cat=(l)=>{let s=(l?.slug||'').toLowerCase();if(/pollution|plastic/.test(s))return'guardian';if(/fishing|bycatch|consumption/.test(s))return'fishing';if(/coast|water-safety|accessible/.test(s))return'coast';if(/citizen|blue-action|responsible|protected|climate/.test(s))return'field';if(/food|ecosystem|posidonia/.test(s))return'reef';return'biodiversity'};
+const catLabel=l=>({reef:'Οικοσύστημα',biodiversity:'Θαλάσσια ζωή',guardian:'Ρύπανση',fishing:'Αλιεία',coast:'Ακτή & πρόσβαση',field:'Δράση & κοινότητα'}[cat(l)]||'Θάλασσα');
+const pct=()=>S.lessons.length?Math.round(Object.values(S.progress).reduce((a,x)=>a+(+x.mastery||0),0)/(S.lessons.length*100)*100):0;
+const done=()=>Object.values(S.progress).filter(x=>x.completed).length;
+const preview=()=>isDemo()?`<div class="ba-preview"><b>Προεπισκόπηση ρόλου:</b> ${esc(viewerLabel())}. Βλέπεις την πλήρη εμπειρία όπως θα την έχει ο χρήστης· οι ενέργειες προεπισκόπησης δεν αλλάζουν τα πραγματικά δεδομένα.</div>`:'';
+const stat=(ico,val,label)=>`<article class="card ba-stat"><span class="ico">${ico}</span><div><strong>${val}</strong><small>${label}</small></div></article>`;
+const hero=(asset,kicker,title,copy,side='')=>`<section class="ba-hero" style="background-image:url('${v(asset)}')"><div><span class="tag">${kicker}</span><h1>${title}</h1><p>${copy}</p></div>${side?`<div class="ba-hero-side">${side}</div>`:''}</section>`;
+const sec=(title,copy='',action='')=>`<div class="ba-section"><div><h2>${title}</h2>${copy?`<p>${copy}</p>`:''}</div>${action}</div>`;
+const contentFor=l=>l?.[S.prefs.level+'_content']||l?.standard_content||{};
+const points=c=>Array.isArray(c?.key_points)&&c.key_points.length?c.key_points:["Παρατήρησε προσεκτικά το θαλάσσιο περιβάλλον.","Σύνδεσε τη γνώση με μια πραγματική επιλογή.","Μοιράσου αυτό που έμαθες με την ομάδα σου."];
+const lessonProgress=l=>+S.progress[l.id]?.mastery||0;
+
+function upgradeShell(){
+  const dr=$('#demoRole');if(dr){dr.setAttribute('aria-label','Προεπισκόπηση εμπειρίας ρόλου');let labels={'':'Κανονική διαχείριση','student':'Προβολή · Μαθητής','beneficiary':'Προβολή · Ωφελούμενος','educator':'Προβολή · Εκπαιδευτικός','caregiver':'Προβολή · Οικογένεια'};[...dr.options].forEach(o=>o.textContent=labels[o.value]||o.textContent)}
+  document.querySelectorAll('.proof span').forEach(x=>{if(/10 ενότητες/.test(x.textContent))x.textContent='18 ενότητες'});
+  const art=document.querySelector('.auth .art');if(art)art.style.backgroundImage=`url('${v('hero')}')`;
+  ensureGameDialog();
+}
+
+const proMenus={
+ learner:[['home','⌂','Αρχική'],['learn','▣','Μαθαίνω'],['games','🎮','Παιχνίδια'],['classroom','👥','Η τάξη μου'],[
