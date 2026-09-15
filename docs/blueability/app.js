@@ -9,4 +9,5 @@ try{
   await import(url);
   document.getElementById('copy')?.classList.add('lesson-copy');
   document.querySelector('#lesson .actions')?.classList.add('modal-actions');
+  await import('./accessibility-first.js?v=20260915a11y2');
 }finally{URL.revokeObjectURL(url)}
