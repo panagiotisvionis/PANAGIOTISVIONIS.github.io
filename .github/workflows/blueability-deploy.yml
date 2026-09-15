@@ -5,6 +5,8 @@ on:
     paths:
       - '.blueability-deploy/**'
       - '.github/workflows/blueability-deploy.yml'
+      - 'docs/blueability/premium.css'
+      - 'docs/blueability/premium.js'
   workflow_dispatch:
 
 permissions:
@@ -15,39 +17,41 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Apply and verify BlueAbility role-testing build
+      - name: Apply BlueAbility premium experience
         shell: bash
         run: |
           set -euo pipefail
-          BASE_EXPECTED='876b386b79519f96c9f9d320113a2285839c2295'
-          FINAL_EXPECTED='698c3e67f1367e65f9aceef53dbce8b13e2ce8b4'
-          BASE_ACTUAL="$(git hash-object docs/blueability/index.html)"
-          echo "Base expected: $BASE_EXPECTED"
-          echo "Base actual:   $BASE_ACTUAL"
-          if [ "$BASE_ACTUAL" = "$FINAL_EXPECTED" ]; then
-            echo 'Role-testing build already present.'
-            exit 0
-          fi
-          test "$BASE_ACTUAL" = "$BASE_EXPECTED"
-          cat .blueability-deploy/v5patch_00 .blueability-deploy/v5patch_01 .blueability-deploy/v5patch_02 | tr -d '\n\r' | base64 -d | gzip -d > /tmp/blueability-v5.patch
-          patch docs/blueability/index.html < /tmp/blueability-v5.patch
+          test -f docs/blueability/premium.css
+          test -f docs/blueability/premium.js
+          node --check docs/blueability/premium.js
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('docs/blueability/index.html')
+          s=p.read_text(encoding='utf-8')
+          css='<link rel="stylesheet" href="./premium.css?v=20260915">'
+          js='<script src="./premium.js?v=20260915"></script>'
+          if css not in s:
+              s=s.replace('</head>',css+'</head>',1)
+          if js not in s:
+              s=s.replace('</body>',js+'</body>',1)
+          s=s.replace('<span>10 ενότητες</span>','<span>18 ενότητες</span>')
+          s=s.replace('Η θάλασσα σε 10 ενότητες.','Η θάλασσα σε 18 ενότητες.')
+          p.write_text(s,encoding='utf-8')
+          PY
+          grep -q 'premium.css?v=20260915' docs/blueability/index.html
+          grep -q 'premium.js?v=20260915' docs/blueability/index.html
+          grep -q 'Η θάλασσα σε 18 ενότητες.' docs/blueability/index.html
           grep -q 'Demo · Μαθητής' docs/blueability/index.html
-          grep -q 'function setDemo(type)' docs/blueability/index.html
-          grep -q 'Οι ενέργειες είναι προσωρινές και δεν αλλάζουν τα πραγματικά δεδομένα.' docs/blueability/index.html
-          grep -q "async function savePrefs(){if(!S.user||isDemo())return;" docs/blueability/index.html
-          FINAL_ACTUAL="$(git hash-object docs/blueability/index.html)"
-          echo "Final expected: $FINAL_EXPECTED"
-          echo "Final actual:   $FINAL_ACTUAL"
-          test "$FINAL_ACTUAL" = "$FINAL_EXPECTED"
+          rm -f .blueability-deploy/premium_assets_00 .blueability-deploy/pd_09
       - name: Commit production build
         shell: bash
         run: |
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add docs/blueability/index.html
+          git add -A docs/blueability .blueability-deploy
           if git diff --cached --quiet; then
             echo 'No deployment change needed.'
             exit 0
           fi
-          git commit -m 'Add BlueAbility admin role testing'
+          git commit -m 'Upgrade BlueAbility premium visuals and content'
           git push
