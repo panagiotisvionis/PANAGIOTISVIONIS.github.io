@@ -10,4 +10,5 @@ try{
   document.getElementById('copy')?.classList.add('lesson-copy');
   document.querySelector('#lesson .actions')?.classList.add('modal-actions');
   await import('./accessibility-first.js?v=20260915a11y2');
+  await import('./visual-dedupe.js?v=20260915visual1');
 }finally{URL.revokeObjectURL(url)}
