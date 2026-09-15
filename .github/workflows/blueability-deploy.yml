@@ -3,8 +3,9 @@ name: Deploy BlueAbility
 on:
   push:
     paths:
-      - '.blueability-prod2/**'
       - '.github/workflows/blueability-deploy.yml'
+      - 'docs/blueability/premium.js'
+      - 'docs/blueability/premium.css'
   workflow_dispatch:
 
 permissions:
@@ -15,49 +16,90 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Build and verify BlueAbility production experience
+      - name: Inline premium application layer into the main module
         shell: bash
         run: |
           set -euo pipefail
+          test -f docs/blueability/index.html
+          test -f docs/blueability/premium.js
           test -f docs/blueability/premium.css
-          for i in 00 01 02 03 04; do test -f ".blueability-prod2/b64_${i}"; done
-          cat .blueability-prod2/b64_00 .blueability-prod2/b64_01 .blueability-prod2/b64_02 .blueability-prod2/b64_03 .blueability-prod2/b64_04 | tr -d '\n\r' | base64 -d | gzip -d > docs/blueability/premium.js
-          echo '37704bf5ca20d5fb1b8aaf89741c14fac519543cbb6fafd729ef5c25c0243c57  docs/blueability/premium.js' | sha256sum -c -
-          echo 'e85ed7da913e465f0113a1e3b466a9ddf17df0bda2e8952a23e9b55e9a74e7a4  docs/blueability/premium.css' | sha256sum -c -
           node --check docs/blueability/premium.js
           python3 - <<'PY'
           from pathlib import Path
-          p=Path('docs/blueability/index.html')
-          s=p.read_text(encoding='utf-8')
-          for old in ['./premium.css?v=20260915pro1','./premium.css?v=20260915']:
-              s=s.replace(old,'./premium.css?v=20260915pro2')
-          for old in ['./premium.js?v=20260915pro1','./premium.js?v=20260915']:
-              s=s.replace(old,'./premium.js?v=20260915pro2')
-          s=s.replace('<span>10 ενότητες</span>','<span>18 ενότητες</span>')
-          s=s.replace('Η θάλασσα σε 10 ενότητες.','Η θάλασσα σε 18 ενότητες.')
-          p.write_text(s,encoding='utf-8')
+          import re
+
+          index_path = Path('docs/blueability/index.html')
+          premium_path = Path('docs/blueability/premium.js')
+          s = index_path.read_text(encoding='utf-8')
+          premium = premium_path.read_text(encoding='utf-8').strip()
+
+          start = '/* BLUEABILITY_PREMIUM_INLINE_START */'
+          end = '/* BLUEABILITY_PREMIUM_INLINE_END */'
+
+          # Remove an earlier inline build if this workflow is re-run.
+          s = re.sub(
+              r'\n?/\* BLUEABILITY_PREMIUM_INLINE_START \*/.*?/\* BLUEABILITY_PREMIUM_INLINE_END \*/\n?',
+              '\n',
+              s,
+              flags=re.S,
+          )
+
+          # The base application is an ES module. A separate classic script cannot
+          # access its module-scoped S/sb/render functions, which is why only the
+          # old UI was visible. Remove the external script and place the premium
+          # layer inside the same module scope.
+          s = re.sub(
+              r'<script\s+src=["\']\./premium\.js(?:\?[^"\']*)?["\']\s*></script>',
+              '',
+              s,
+              flags=re.I,
+          )
+
+          block = f"\n{start}\n{premium}\n{end}\n"
+          anchor = 'await boot();'
+          pos = s.rfind(anchor)
+          if pos < 0:
+              raise SystemExit('Could not find await boot() anchor in BlueAbility module')
+          s = s[:pos] + block + s[pos:]
+
+          # Force a fresh stylesheet fetch too.
+          s = re.sub(
+              r'\./premium\.css\?v=[^"\']+',
+              './premium.css?v=20260915pro3',
+              s,
+          )
+
+          index_path.write_text(s, encoding='utf-8')
           PY
-          grep -q 'premium.css?v=20260915pro2' docs/blueability/index.html
-          grep -q 'premium.js?v=20260915pro2' docs/blueability/index.html
-          grep -q 'Κοινότητα BlueAbility' docs/blueability/premium.js
-          grep -q 'join_classroom_by_code' docs/blueability/premium.js
-          grep -q 'request_caregiver_link_by_email' docs/blueability/premium.js
-          grep -q 'Ο Φύλακας της Θάλασσας' docs/blueability/premium.js
-          grep -q 'Γνώρισε τα Είδη της Μεσσηνίας' docs/blueability/premium.js
-          grep -q 'speechSynthesis' docs/blueability/premium.js
-          rm -rf .blueability-prod2
-          rm -rf .blueability-pro .blueability-assets
-          rm -f docs/blueability/assets/hero.webp.b64
-          rm -f .blueability-deploy/projsb64_00 .blueability-deploy/projsb64_01 .blueability-deploy/projsb64_02 .blueability-deploy/projsb64_03 .blueability-deploy/projsb64_04 .blueability-deploy/projsb64_05 .blueability-deploy/projsb64_06 .blueability-deploy/projsb64_07
-      - name: Commit production build
+
+          grep -q 'BLUEABILITY_PREMIUM_INLINE_START' docs/blueability/index.html
+          grep -q 'Κανονική διαχείριση' docs/blueability/index.html
+          grep -q 'Κοινότητα BlueAbility' docs/blueability/index.html
+          if grep -q '<script src="./premium.js' docs/blueability/index.html; then
+            echo 'External premium.js loader still present' >&2
+            exit 1
+          fi
+
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+          s = Path('docs/blueability/index.html').read_text(encoding='utf-8')
+          m = re.search(r'<script type="module">(.*?)</script>', s, re.S)
+          if not m:
+              raise SystemExit('Module script not found')
+          Path('/tmp/blueability-production.mjs').write_text(m.group(1), encoding='utf-8')
+          PY
+          node --check /tmp/blueability-production.mjs
+
+      - name: Commit corrected production build
         shell: bash
         run: |
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add -A docs/blueability .blueability-prod2 .blueability-pro .blueability-assets .blueability-deploy
+          git add docs/blueability/index.html
           if git diff --cached --quiet; then
             echo 'No deployment change needed.'
             exit 0
           fi
-          git commit -m 'Launch BlueAbility production learning experience'
+          git commit -m 'Fix BlueAbility premium module integration'
           git push
