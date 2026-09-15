@@ -15,24 +15,26 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Apply and verify BlueAbility admin-role hardening build
+      - name: Apply and verify BlueAbility role-testing build
         shell: bash
         run: |
           set -euo pipefail
-          BASE_EXPECTED='7d3dd3916251cd90caa28383ef900223242e73f5'
-          FINAL_EXPECTED='876b386b79519f96c9f9d320113a2285839c2295'
+          BASE_EXPECTED='876b386b79519f96c9f9d320113a2285839c2295'
+          FINAL_EXPECTED='698c3e67f1367e65f9aceef53dbce8b13e2ce8b4'
           BASE_ACTUAL="$(git hash-object docs/blueability/index.html)"
           echo "Base expected: $BASE_EXPECTED"
           echo "Base actual:   $BASE_ACTUAL"
           if [ "$BASE_ACTUAL" = "$FINAL_EXPECTED" ]; then
-            echo 'V4 already present.'
+            echo 'Role-testing build already present.'
             exit 0
           fi
           test "$BASE_ACTUAL" = "$BASE_EXPECTED"
-          cat .blueability-deploy/v4patch_00 .blueability-deploy/v4patch_01 | tr -d '\n\r' | base64 -d | gzip -d > /tmp/blueability-v4.patch
-          patch docs/blueability/index.html < /tmp/blueability-v4.patch
-          grep -q "if(role()==='org_admin')return organization()" docs/blueability/index.html
-          grep -q 'prefs();showApp();renderNav();if(!p)' docs/blueability/index.html
+          cat .blueability-deploy/v5patch_00 .blueability-deploy/v5patch_01 .blueability-deploy/v5patch_02 | tr -d '\n\r' | base64 -d | gzip -d > /tmp/blueability-v5.patch
+          patch docs/blueability/index.html < /tmp/blueability-v5.patch
+          grep -q 'Demo · Μαθητής' docs/blueability/index.html
+          grep -q 'function setDemo(type)' docs/blueability/index.html
+          grep -q 'Οι ενέργειες είναι προσωρινές και δεν αλλάζουν τα πραγματικά δεδομένα.' docs/blueability/index.html
+          grep -q "async function savePrefs(){if(!S.user||isDemo())return;" docs/blueability/index.html
           FINAL_ACTUAL="$(git hash-object docs/blueability/index.html)"
           echo "Final expected: $FINAL_EXPECTED"
           echo "Final actual:   $FINAL_ACTUAL"
@@ -47,5 +49,5 @@ jobs:
             echo 'No deployment change needed.'
             exit 0
           fi
-          git commit -m 'Deploy BlueAbility admin role fix'
+          git commit -m 'Add BlueAbility admin role testing'
           git push
