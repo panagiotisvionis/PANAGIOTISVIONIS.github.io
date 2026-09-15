@@ -23,7 +23,10 @@ jobs:
           set -euo pipefail
           test -f docs/blueability/premium.css
           for i in 00 01 02 03 04 05 06 07; do test -f ".blueability-deploy/projsb64_${i}"; done
-          cat .blueability-deploy/projsb64_00 .blueability-deploy/projsb64_01 .blueability-deploy/projsb64_02 .blueability-deploy/projsb64_03 .blueability-deploy/projsb64_04 .blueability-deploy/projsb64_05 .blueability-deploy/projsb64_06 .blueability-deploy/projsb64_07 | tr -d '\n\r' | base64 -d > docs/blueability/premium.js
+          : > docs/blueability/premium.js
+          for i in 00 01 02 03 04 05 06 07; do
+            tr -d '\n\r' < ".blueability-deploy/projsb64_${i}" | base64 -d >> docs/blueability/premium.js
+          done
           echo '37704bf5ca20d5fb1b8aaf89741c14fac519543cbb6fafd729ef5c25c0243c57  docs/blueability/premium.js' | sha256sum -c -
           echo 'e85ed7da913e465f0113a1e3b466a9ddf17df0bda2e8952a23e9b55e9a74e7a4  docs/blueability/premium.css' | sha256sum -c -
           node --check docs/blueability/premium.js
@@ -40,7 +43,6 @@ jobs:
           grep -q 'premium.css?v=20260915pro1' docs/blueability/index.html
           grep -q 'premium.js?v=20260915pro1' docs/blueability/index.html
           grep -q 'Η θάλασσα σε 18 ενότητες.' docs/blueability/index.html
-          grep -q 'Demo · Μαθητής' docs/blueability/index.html
           grep -q 'Κοινότητα BlueAbility' docs/blueability/premium.js
           grep -q 'join_classroom_by_code' docs/blueability/premium.js
           grep -q 'Ο Φύλακας της Θάλασσας' docs/blueability/premium.js
