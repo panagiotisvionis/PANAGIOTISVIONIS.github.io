@@ -5,4 +5,8 @@ const packed=(await Promise.all(parts.map(async p=>{const r=await fetch('./'+p+'
 const raw=Uint8Array.from(atob(packed),c=>c.charCodeAt(0));
 const source=await new Response(new Blob([raw]).stream().pipeThrough(new DecompressionStream('gzip'))).text();
 const url=URL.createObjectURL(new Blob([source],{type:'text/javascript'}));
-try{await import(url)}finally{URL.revokeObjectURL(url)}
+try{
+  await import(url);
+  document.getElementById('copy')?.classList.add('lesson-copy');
+  document.querySelector('#lesson .actions')?.classList.add('modal-actions');
+}finally{URL.revokeObjectURL(url)}
