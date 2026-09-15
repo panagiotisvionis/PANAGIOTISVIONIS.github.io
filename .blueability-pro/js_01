@@ -1,0 +1,22 @@
+'assistant','◉','Θαλάσσιος Βοηθός'],['field','✦','Δράσεις'],['community','☁','Κοινότητα'],['progress','▥','Η πρόοδός μου']],
+ educator:[['home','⌂','Επισκόπηση'],['learn','▣','Βιβλιοθήκη'],['classroom','👥','Τάξεις'],['games','🎮','Δραστηριότητες'],['field','✦','Δράσεις'],['community','☁','Κοινότητα'],['progress','▥','Αναφορές']],
+ caregiver:[['home','⌂','Επισκόπηση'],['progress','▥','Πρόοδος'],['learn','▣','Τι μαθαίνουμε'],['field','✦','Δράσεις'],['community','☁','Κοινότητα']],
+ org_admin:[['home','⌂','Οργανισμός'],['organization','⚙','Διαχείριση'],['learn','▣','Περιεχόμενο'],['games','🎮','Δραστηριότητες'],['progress','▥','Analytics'],['field','✦','Δράσεις'],['community','☁','Κοινότητα']]
+};
+renderNav=function(){let items=proMenus[role()]||proMenus.learner;$('#nav').innerHTML=items.map(x=>`<button data-v="${x[0]}"><span>${x[1]}</span><span>${x[2]}</span></button>`).join('');$$('[data-v]').forEach(b=>b.onclick=()=>go(b.dataset.v))};
+const baseShowApp=showApp;showApp=function(){baseShowApp();$('#ur').textContent=(isDemo()?'ΠΡΟΕΠΙΣΚΟΠΗΣΗ · ':'')+viewerLabel()};
+pending=preview;
+setDemo=function(type){if(!isAdmin())return;S.demoRole=type||null;S.progress=S.demoRole?makeDemoProgress(S.demoRole):JSON.parse(JSON.stringify(S.realProgress||{}));showApp();renderNav();go('home');toast(S.demoRole?'Άνοιξε προεπισκόπηση '+viewerLabel()+'.':'Επέστρεψες στη διαχείριση BlueAbility.')};
+go=function(view){S.view=view;$$('#nav button').forEach(b=>b.classList.toggle('on',b.dataset.v===view));let map={home,learn,games,assistant,field,progress,classroom,organization,community};(map[view]||home)();$('#side').classList.remove('open')};
+
+cards=function(arr){return arr.map(l=>{let p=lessonProgress(l);return`<article class="card ba-visual-card lesson" data-cat="${cat(l)}"><div class="ba-thumb" style="background-image:url('${v(cat(l))}')"></div><div class="ba-card-body"><div style="display:flex;justify-content:space-between;gap:8px"><span class="tag">Ενότητα ${String(l.position).padStart(2,'0')}</span><small class="muted">${catLabel(l)}</small></div><h3>${esc(l.title)}</h3><p>${esc(l.summary||'')}</p><div class="ba-progress"><i style="width:${p}%"></i></div><div class="ba-card-foot"><small class="muted">${p?p+'% πρόοδος':'Νέα ενότητα'}</small><button class="btn q" data-l="${l.id}">${p?'Συνέχισε':'Ξεκίνα'} →</button></div></div></article>`}).join('')||'<div class="card ba-empty"><span class="ico">🌊</span><p>Δεν υπάρχουν διαθέσιμες ενότητες.</p></div>'};
+
+home=async function(){
+ if(role()==='org_admin'&&!isDemo())return organization();
+ if(role()==='educator')return educatorHome();
+ if(role()==='caregiver')return caregiverHome();
+ let first=S.lessons.find(l=>!S.progress[l.id]?.completed)||S.lessons[0];let p=pct();
+ let requests='';
+ if(!isDemo()&&role()==='learner'){
+   let{data:r}=await sb.from('caregiver_links').select('caregiver_id,created_at').eq('learner_id',S.user.id).is('approved_at',null);
+   if(r?.length)requests=`<article class="card ba-panel"><h3>Αίτημα σύνδεσης οικο
