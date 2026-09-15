@@ -1,0 +1,54 @@
+name: Verify BlueAbility
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Validate production JavaScript
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --check docs/blueability/premium.js
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+
+          premium = Path('docs/blueability/premium.js').read_text(encoding='utf-8')
+          index = Path('docs/blueability/index.html').read_text(encoding='utf-8')
+
+          if re.search(r'(?m)^\s*community=async function', premium):
+              raise SystemExit('undeclared community assignment remains in premium.js')
+          if re.search(r'(?m)^\s*community=async function', index):
+              raise SystemExit('undeclared community assignment remains in index.html')
+          if 'const community=async function' not in premium:
+              raise SystemExit('declared community function missing in premium.js')
+          if 'const community=async function' not in index:
+              raise SystemExit('declared community function missing in index.html')
+          if 'Κανονική διαχείριση' not in index:
+              raise SystemExit('admin view label missing')
+          if 'premium.css?v=20260915pro5' not in index:
+              raise SystemExit('expected production CSS version missing')
+
+          m = re.search(r'<script type="module">(.*?)</script>', index, re.S)
+          if not m:
+              raise SystemExit('module script missing')
+          Path('/tmp/blueability.mjs').write_text(m.group(1), encoding='utf-8')
+          PY
+          node --check /tmp/blueability.mjs
+
+      - name: Verify production markers
+        shell: bash
+        run: |
+          set -euo pipefail
+          grep -q 'BLUEABILITY_PREMIUM_INLINE_START' docs/blueability/index.html
+          grep -q 'Κοινότητα BlueAbility' docs/blueability/index.html
+          grep -q '18 θεματικές διαδρομές' docs/blueability/index.html
+          echo 'BlueAbility production source passed verification.'
