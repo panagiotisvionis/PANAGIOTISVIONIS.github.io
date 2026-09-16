@@ -16,4 +16,5 @@ try{
   document.querySelector('#lesson .actions')?.classList.add('modal-actions');
   await import('./accessibility-first.js?v=20260915a11y2');
   await import('./visual-dedupe.js?v=20260916semantic1');
+  await import('./ui-template-fix.js?v=20260916ui1');
 }finally{URL.revokeObjectURL(url)}
