@@ -1,182 +1,81 @@
 (()=>{
 'use strict';
 
-/*
- BlueAbility global visual manifest
- Rule: one photographic image belongs to exactly one semantic UI slot.
- The mapping is deterministic across reloads and routes, not session-random.
-*/
-const BUILD='visual-global-v2';
-const VISUAL_SELECTORS=[
-  '.auth-art','.art',
-  '.ba-hero','.heroCard',
-  '.ba-thumb','.visual','.lesson-visual','.ba-lesson-hero',
-  '.game-visual','.ba-game-visual',
-  '.card-cover','.ba-class-cover','.event-cover','.field-cover'
-].join(',');
-const slotMap=new Map();
-const lockOwner=new Map();
-let scheduled=0;
-
+/* BlueAbility Semantic Visual Manifest
+   Invariant: one photographic asset belongs to exactly one semantic UI slot. */
+const BUILD='semantic-photo-manifest-20260916-v1';
+const STORE='blueability-semantic-photo-manifest-v1';
 const $=(s,r=document)=>r.querySelector(s);
 const $$=(s,r=document)=>[...r.querySelectorAll(s)];
 const clean=s=>String(s||'').replace(/\s+/g,' ').trim();
+const norm=s=>clean(s).normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
+const U=id=>`https://unsplash.com/photos/${id}/download?force=true&w=1600`;
+const P=id=>`https://images.unsplash.com/photo-${id}?auto=format&fit=crop&w=1600&q=82`;
 
-function hash32(str,seed=2166136261){
-  let h=seed>>>0;
-  for(let i=0;i<str.length;i++){
-    h^=str.charCodeAt(i);
-    h=Math.imul(h,16777619);
-  }
-  h^=h>>>16;
-  h=Math.imul(h,0x85ebca6b);
-  h^=h>>>13;
-  h=Math.imul(h,0xc2b2ae35);
-  h^=h>>>16;
-  return h>>>0;
-}
-
-function activeView(){
-  const active=$('#nav [data-v].on');
-  const role=clean($('#ur')?.textContent).toLowerCase();
-  if(active?.dataset?.v)return `${role||'user'}:${active.dataset.v}`;
-  if(!$('#app')?.classList.contains('hide'))return `${role||'user'}:app`;
-  return 'public:auth';
-}
-
-function nearestTitle(el){
-  const owner=el.closest('article,section,dialog,.card,.lesson,.ba-visual-card,.ba-game-card,.ba-action,.ba-class');
-  if(!owner)return'';
-  return clean(owner.querySelector('h1,h2,h3,h4,[data-title]')?.textContent||owner.getAttribute('aria-label')||'').slice(0,120);
-}
-
-function semanticId(el,index){
-  const explicit=[
-    el.id,
-    el.dataset?.l,el.dataset?.play,el.dataset?.j,el.dataset?.openclass,
-    el.closest('[data-l]')?.dataset?.l,
-    el.closest('[data-play]')?.dataset?.play,
-    el.closest('[data-j]')?.dataset?.j,
-    el.closest('[data-openclass]')?.dataset?.openclass
-  ].filter(Boolean).join(':');
-  const cls=clean(el.className).split(' ').filter(Boolean).sort().join('.').slice(0,100);
-  const title=nearestTitle(el);
-  const sectionTitle=clean(el.closest('section')?.querySelector('h1,h2')?.textContent||'').slice(0,100);
-  return `${activeView()}|${explicit||'-'}|${cls||el.tagName}|${title||sectionTitle||'-'}|slot:${index}`;
-}
-
-function topicFor(el){
-  const s=clean(`${activeView()} ${nearestTitle(el)} ${el.parentElement?.innerText||''}`).toLowerCase();
-  if(/αναπηρ|αμεα|ωφελ|προσβασ|αμαξ|συνοδ|ένταξ/.test(s))return'inclusive,disability,people,coast';
-  if(/χελων/.test(s))return'sea,turtle,mediterranean,wildlife';
-  if(/ποσειδων/.test(s))return'posidonia,seagrass,mediterranean,underwater';
-  if(/κοραλλ|ύφαλ|οικοσυσ/.test(s))return'underwater,reef,mediterranean,marine';
-  if(/πλασ|ρύπαν|σκουπ|καθαρ/.test(s))return'ocean,cleanup,environment,coast';
-  if(/αλι|ψαρ|δίχτυ/.test(s))return'sustainable,fishing,mediterranean,sea';
-  if(/εκπαιδευ|τάξ|μάθη|βιβλιοθήκ/.test(s))return'inclusive,education,technology,learning';
-  if(/οικογέν|φροντισ/.test(s))return'family,inclusion,coast,outdoors';
-  if(/κοινότη|εθελον|δράσ/.test(s))return'community,volunteer,coast,mediterranean';
-  if(/πρόοδο|analytics|διαχείρι/.test(s))return'ocean,technology,education,blue';
-  if(/παιχνίδ|αποστολή/.test(s))return'ocean,exploration,marine,adventure';
-  return'mediterranean,ocean,marine,coast';
-}
-
-function uniqueLock(key){
-  for(let salt=0;salt<1000;salt++){
-    const lock=10000+(hash32(`${BUILD}|${key}|${salt}`)%900000000);
-    const owner=lockOwner.get(lock);
-    if(!owner||owner===key){lockOwner.set(lock,key);return lock}
-  }
-  return 900000001+(slotMap.size%999999);
-}
-
-function imageFor(key,topic){
-  if(slotMap.has(key))return slotMap.get(key);
-  const lock=uniqueLock(key);
-  // lock makes each semantic slot stable; different slots never share the same lock.
-  const url=`https://loremflickr.com/1600/900/${encodeURIComponent(topic)}?lock=${lock}`;
-  slotMap.set(key,url);
-  return url;
-}
-
-function apply(el,url,key){
-  if(el.dataset.baVisualSlot===key&&el.dataset.baVisualUrl===url)return;
-  el.dataset.baVisualSlot=key;
-  el.dataset.baVisualUrl=url;
-  el.dataset.baUniquePhoto='true';
-  const isHero=el.matches('.auth-art,.art,.ba-hero,.heroCard,.ba-lesson-hero,.game-visual,.ba-game-visual');
-  const overlay=isHero
-    ? 'linear-gradient(120deg,rgba(3,31,48,.76),rgba(5,62,78,.36),rgba(4,35,49,.18)),'
-    : '';
-  el.style.backgroundImage=`${overlay}url("${url}")`;
-  el.style.backgroundSize='cover';
-  el.style.backgroundPosition='center';
-}
-
-function collect(){
-  const roots=[];
-  if(!$('#auth')?.classList.contains('hide'))roots.push($('#auth'));
-  if(!$('#app')?.classList.contains('hide'))roots.push($('#app'));
-  if(!roots.length)roots.push(document);
-  const out=[];
-  roots.forEach(root=>{
-    if(!root)return;
-    $$(VISUAL_SELECTORS,root).forEach(el=>{
-      // Avoid styling plain text wrappers named .hero unless they already carry/expect a visual background.
-      if(el.matches('.hero')&&!el.classList.contains('ba-hero')&&!/url\(/.test(getComputedStyle(el).backgroundImage||''))return;
-      if(!out.includes(el))out.push(el);
-    });
-  });
-  return out;
-}
-
-function audit(){
-  const elements=collect();
-  const routeSeen=new Set();
-  elements.forEach((el,index)=>{
-    const key=semanticId(el,index);
-    let url=imageFor(key,topicFor(el));
-    // Defensive duplicate check for the current DOM as well.
-    if(routeSeen.has(url)){
-      const altKey=`${key}|collision:${index}`;
-      url=imageFor(altKey,topicFor(el));
-    }
-    routeSeen.add(url);
-    apply(el,url,key);
-  });
-
-  // Final invariant: no two visible photographic slots may expose the same assigned URL.
-  const finalSeen=new Map();
-  elements.forEach((el,index)=>{
-    const u=el.dataset.baVisualUrl;
-    if(!u)return;
-    if(finalSeen.has(u)){
-      const key=`${semanticId(el,index)}|repair`;
-      const url=imageFor(key,topicFor(el));
-      apply(el,url,key);
-    }else finalSeen.set(u,el);
-  });
-}
-
-function schedule(){
-  cancelAnimationFrame(scheduled);
-  scheduled=requestAnimationFrame(()=>setTimeout(audit,0));
-}
-
-const mo=new MutationObserver(muts=>{
-  // Ignore our own data/style writes; react mainly to route/content replacement.
-  if(muts.some(m=>m.type==='childList'))schedule();
-});
-mo.observe(document.documentElement,{childList:true,subtree:true});
-window.addEventListener('load',()=>setTimeout(audit,120));
-document.addEventListener('click',()=>setTimeout(audit,80),true);
-window.addEventListener('popstate',()=>setTimeout(audit,80));
-setTimeout(audit,220);
-
-// Small diagnostic for manual QA in DevTools without affecting users.
-window.BlueAbilityVisualAudit=()=>{
-  const rows=collect().map((el,index)=>({slot:semanticId(el,index),url:el.dataset.baVisualUrl||'',title:nearestTitle(el)}));
-  const counts=rows.reduce((m,r)=>(m[r.url]=(m[r.url]||0)+1,m),{});
-  return {total:rows.length,duplicates:Object.entries(counts).filter(([u,n])=>u&&n>1),rows};
+const POOLS={
+ reef:['9y7y26C-l4Y','iLwQIbWxv-s','_tDdlCJIwOA','l-QdJMZX7PU','x9yfTxHpj5w','EW9z19sPiZc','YmuOFJ7oa3E','5iiI5wVXY8M','Fsdku8J-5hs','xNpxB9bfLUE','Gv-Cx3_clZ4','q0J6zQPO-zw','G4sk0CjA8Rc','bOMVTvE2QFU','t1Cn3dlTQ5k','-GmTNvg97P8','fwYrUNCjZus','gl1fmslJ8E8','ZrdrX3vNOnQ','p:1642518383010-a58bb72a5aef','p:1731486014172-8efff1cf31f1','p:1696693886265-e73512cdf712','p:1727093481948-a84c1c24db99','p:1717062785100-246f252d427c','p:1634813806393-88dde2cf6713','p:1674214018845-84f606d7ea35','p:1706352352949-bb5142f924dd','p:1770535849102-6479c8bfb179','p:1611833767698-7a8a336761db','p:1627685061358-fa707d7a9c8e','p:1713238673432-5aab64a72c1c','p:1713238500160-4ad7e9d14db2'],
+ turtle:['Uu1CtKngEXY','IBEXUZBmlXg','3_L29ZZkP0w','hHMASXsb9KU','L-2p8fapOA8','N5ByCirHVqw','M8xxVih_V_U','LVnJlyfa7Zk','9R_bNdo4-2I','iRgbLpf50IE','9XzyEzPAHMI','3GgbJx7hg14','-rIps_UXSV4','aGihPIbrtVE','uGPBqF1Yls0','Ph2KtIqKs7c','gqQeXtvuuAQ','cndYGSgEQ2E','_GqwoiT7QY8'],
+ posidonia:['jj9siQCkvw4','1CcgPeymItg','NtOptghMNvg','IhM-kvWRhS4','N2LK3ByDabM','btsAoomBCeM','UHPq2Lh2QxU','mVOp96B7UNE','K_zxWLQMgcw','tsVTOprsIYU','Ugap_KY-OF8'],
+ pollution:['BJUoZu0mpt0','FxnqdmKBJps','isBu-nDo9-I','bN_pgc53NO4','frWkCQZhe-I','2St3S36Gu7w','gcLItQZgHYM','PsWUz7l8zaw','iZP2Uwsc_wk','pZ8PL1t1CLQ','zjfHfXykgDc','V8EdKmpj974','dFm591Wqsl4','oxbzN6KY17s','ZdnRnDHmRmM','ZmIIUYsMidg','YdTzPNWf64U','qx9zJYc177A','n3bjnRLpLFs'],
+ fishing:['6_HqvY1E7NI','qr7tsSwDOg0','cZVzzFadTMc','XLqQLrkuBkI','DUZ9XT10Y_A','lj68Swk5Tgo','-Ja4Mk8tEfI','ZGRB8TMT6zQ','JtRXnUNWHt4','OGZon8fMkp0','VEobb3p5yOI','mDrUwzB1AJI','Lv-LZXGyE3A','BQ3BGMni8Ww','CbeApl8sxxw','3NcRmm88PbY','91hGAhPmKrY','Sbx3VC3NX-A','idlF1w4j0bs','HDJEQ7-a-YQ','9oMbHpq0FdI','pP7EgaYDRKg','ekQx8X1i8Qs','97fw6OiXOq4','X5RF8GFsX4k','Cx2eiOj_K9o','YTV2zNt8Zqg','p1Ka3uqb590','9oR0KiSHgVc'],
+ cleanup:['EPPS6W5LdXs','PzQNdXw2a6g','SIg-qmg9NHw','bWAArZ5M4Ag','xch7jXAaqqo','zBEE5as5XpY','-h4B4-jzfnw','35l5OVoC7ws','ttqpafD1T1c','psRG_u3DLps'],
+ education:['zFSo6bnZJTw','Dhoy-bWjv-I','Qu1h2cUCUiU','aihI4_1lTTg','Y4pvI2pFkTY','J2tMrVcx0WY','wog7pvO66WM','u2UxB7ZfqDU','M-4lFg1Xfag','MUyq5MiVE2w','6c86TCPmNRQ'],
+ family:['SIOdjcYotms','KzvUfXlfCKA','UBQBuIU4ZvI','7noZJ_4nhU8','sqrAHSoc0bE','4EPCxzOqwAY','cf1cN3ofKUM','aKBRpEE0ssM','WQT6IQbXCB4','naO7yFfuBa4'],
+ accessibility:['0bDd5rZlZmk','O7ke8N4kTpQ','rEOVfkfleok','zBsdRTHIIm4','X-e2UGY2g-w','7NoYTT9OmiI','4s-D0CAI6UQ','o6jUolZ7QJk','vofmJUVScDE','oY5mX1aW72A','14Newpakiyw','eDOYvF6pM1I','Bmzi7LDUFVY','FK70wR_MAug','rUW_SiE512U','p:1569937703691-0f9b8cf21a25','p:1581090122319-8fab9528eaaa','p:1709880631993-0ec9e9093fa7','p:1695654398336-5cf41b2dc558','p:1732194438396-394d2b7c2436','p:1611235898661-17a251450a2a','p:1709127347878-bd27e64d1e3e','p:1684707878192-8d4ff0f72c0f','p:1728889156277-33f9bb0230a9','p:1633466158216-d1c0e8b1b0b4','p:1695654403664-003951bf77a2','p:1695654402339-050e6aee866b','p:1620069105786-c42c8b55b328','p:1720659201153-e0c195776963'],
+ coast:['qqVg4TLopXY','0M_FnJV1PUU','LFh6hOMxkI8','eadc9gq1TLo','aRbhfdbq484','PHHc1gaEM3M','9QRI6QyqnpY','i4Wj0xgh7rw','4ipl-GYCnbM','HNGCCp1o5iY'],
+ admin:['chWUci5gEIc','sXWHRNi1Njg','WYBOow2ekw8','vmzFY0tS8T0','WwWPcQkzHPk']
 };
+const ALL=[];
+Object.entries(POOLS).forEach(([category,ids])=>ids.forEach(id=>ALL.push({id,category,url:id.startsWith('p:')?P(id.slice(2)):U(id)})));
+const ALL_BY_ID=new Map(ALL.map(a=>[a.id,a]));
+if(new Set(ALL.map(a=>a.id)).size!==ALL.length)console.error('BlueAbility visual manifest contains duplicate source IDs.');
+
+const FALLBACK_QUERY={reef:'mediterranean underwater coral reef fish marine ecosystem',turtle:'sea turtle underwater mediterranean wildlife',posidonia:'underwater seagrass meadow mediterranean marine plants',pollution:'ocean plastic pollution beach marine litter',fishing:'sustainable fishing boat net sea mediterranean',cleanup:'beach cleanup volunteers coast environment',education:'inclusive classroom education students teacher learning',family:'family beach coast outdoor learning',accessibility:'wheelchair accessibility inclusive people outdoors education',coast:'mediterranean coast beach sea protected area',admin:'mediterranean marine project professional coast'};
+const RELATED={reef:['posidonia','coast'],turtle:['reef','coast'],posidonia:['reef','coast'],pollution:['cleanup','coast'],fishing:['coast','reef'],cleanup:['pollution','coast'],education:['accessibility','family'],family:['accessibility','coast'],accessibility:['education','family','coast'],coast:['reef','admin'],admin:['coast','education']};
+const DESCR={reef:'Θαλάσσιο οικοσύστημα και θαλάσσια ζωή',turtle:'Θαλάσσια χελώνα στο φυσικό περιβάλλον',posidonia:'Υποθαλάσσιο λιβάδι και θαλάσσια βλάστηση',pollution:'Θαλάσσια ρύπανση και πλαστικά',fishing:'Αλιεία, δίχτυα και θαλάσσια παραγωγή',cleanup:'Συμμετοχική δράση και καθαρισμός ακτής',education:'Προσβάσιμη εκπαίδευση και συνεργατική μάθηση',family:'Οικογένεια και υποστηρικτική συμμετοχή κοντά στη θάλασσα',accessibility:'Άτομα με αναπηρία σε ενεργό και προσβάσιμο περιβάλλον',coast:'Μεσογειακή ακτή και θαλάσσιο τοπίο',admin:'Επαγγελματική εικόνα θαλάσσιου έργου και οργανισμού'};
+
+let state={slots:{},used:{},failed:{}};
+try{state={...state,...JSON.parse(localStorage.getItem(STORE)||'{}')}}catch(_){ }
+state.slots=state.slots||{};state.used=state.used||{};state.failed=state.failed||{};
+function rebuildUsed(){const rebuilt={};Object.entries(state.slots).forEach(([slot,id])=>{if(!id||rebuilt[id])delete state.slots[slot];else rebuilt[id]=slot});state.used=rebuilt}
+rebuildUsed();
+try{sessionStorage.removeItem('blueability-visual-map-v1');localStorage.removeItem('blueability-visual-manifest-v3')}catch(_){ }
+const persist=()=>{try{localStorage.setItem(STORE,JSON.stringify(state))}catch(_){ }};persist();
+function hash32(str){let h=2166136261>>>0;for(let i=0;i<str.length;i++){h^=str.charCodeAt(i);h=Math.imul(h,16777619)}h^=h>>>16;return h>>>0}
+function roleKey(){const demo=$('#demoRole');if(demo?.value)return demo.value;const s=norm($('#ur')?.textContent||'');if(/admin|διαχειρ|οργανισμ/.test(s))return'admin';if(/εκπαιδευ/.test(s))return'educator';if(/οικογεν|φροντιστ/.test(s))return'caregiver';if(/ωφελ|αναπηρ/.test(s))return'beneficiary';if(/μαθητ/.test(s))return'student';return $('#app')?.classList.contains('hide')?'public':'learner'}
+function viewKey(){const on=$('#nav [data-v].on');if(on?.dataset?.v)return on.dataset.v;if(!$('#lesson')?.open&&!$('#gameModal')?.open&&!$('#app')?.classList.contains('hide'))return'home';return $('#app')?.classList.contains('hide')?'auth':'app'}
+function lessonContext(){if(!$('#lesson')?.open)return'';return clean(`${$('#lt')?.textContent||''} ${$('#steps .on')?.textContent||''}`)}
+function gameContext(){return $('#gameModal')?.open?clean($('#gameModal h1,#gameModal h2,#gameModal h3')?.textContent||''):''}
+function nearestOwner(el){return el.closest('article,section,dialog,.card,.lesson,.ba-visual-card,.ba-game-card,.ba-action,.ba-class,#copy')}
+function nearestTitle(el){if(el.closest('#lesson'))return lessonContext();if(el.closest('#gameModal'))return gameContext();const owner=nearestOwner(el);return clean(owner?.querySelector('h1,h2,h3,h4,[data-title]')?.textContent||owner?.getAttribute('aria-label')||'').slice(0,140)}
+function kind(el){if(el.matches('.auth-art,.art'))return'auth-hero';if(el.matches('.ba-auto-lesson-visual'))return'lesson-step';if(el.matches('.ba-lesson-hero,.lesson-visual'))return'lesson-visual';if(el.matches('.ba-game-visual,.game-visual'))return'game-screen';if(el.matches('.ba-hero,.heroCard,.premiumHero'))return'page-hero';if(el.matches('.ba-class-cover,.card-cover'))return'class-cover';if(el.matches('.event-cover,.field-cover'))return'field-cover';return'card-visual'}
+function semanticFor(el){
+ const role=roleKey(),view=viewKey(),title=norm(nearestTitle(el)),owner=nearestOwner(el),body=norm(clean(owner?.innerText||el.parentElement?.innerText||'').slice(0,700)),lesson=norm(lessonContext()),strong=`${lesson} ${title}`;
+ if(/χελων|turtle/.test(strong))return'turtle';
+ if(/ποσειδων|posidonia|θαλασσι.*λιβαδ|seagrass/.test(strong))return'posidonia';
+ if(/καθαρη ακτη|καθαρισ|εθελον|πολιτες επιστημον|blue action|γνωση στη δραση/.test(strong))return'cleanup';
+ if(/μικροπλασ|πλαστικ|ρυπαν|απορριμμ|σκουπιδ|marine litter/.test(strong))return'pollution';
+ if(/παρεμπιπτον|αλιει|αλιε|διχτυ|ψαρ|τραπεζι|bycatch|fishing/.test(strong))return'fishing';
+ if(/προσβασιμη παραλια|προσβασ|αναπηρ|αμεα|ωφελ|αμαξ|wheelchair/.test(strong)||/αναπηρ|αμεα|ωφελ|αμαξ|wheelchair/.test(body))return'accessibility';
+ if(/οικογεν|φροντιστ|caregiver/.test(strong))return'family';
+ if(/εκπαιδευ|ταξ|αναθεσ|βιβλιοθηκ|classroom|teacher/.test(strong))return'education';
+ if(/οικοσυσ|τροφικ|ειδη|βιοποικιλ|coral|reef/.test(strong))return'reef';
+ if(/κλιματ|ακτ|παραλι|προστατευομεν|τουρισμ|ασφαλεια στη θαλασσα|coast/.test(strong))return'coast';
+ if(view==='classroom')return'education';if(view==='field'||view==='community')return'cleanup';if(view==='games'||view==='assistant')return'reef';if(view==='organization'||view==='progress'&&role==='admin')return'admin';
+ if(view==='home'){if(role==='beneficiary')return'accessibility';if(role==='educator')return'education';if(role==='caregiver')return'family';if(role==='admin')return'admin';return'coast'}
+ if(role==='beneficiary'&&kind(el)==='page-hero')return'accessibility';if(role==='educator'&&kind(el)==='page-hero')return'education';if(role==='caregiver'&&kind(el)==='page-hero')return'family';if(role==='admin'&&kind(el)==='page-hero')return'admin';return view==='learn'?'reef':'coast'
+}
+function visualElements(){const selectors=['.auth-art','.art','.ba-hero','.heroCard','.premiumHero','.premiumStrip','.ba-thumb','.visual','.visualCard','.lessonVisual','.lesson-visual','.ba-lesson-hero','.ba-auto-lesson-visual','.gameIcon.premiumGame','.game-visual','.ba-game-visual','.card-cover','.ba-class-cover','.event-cover','.field-cover'].join(',');const roots=[];if(!$('#auth')?.classList.contains('hide'))roots.push($('#auth'));if(!$('#app')?.classList.contains('hide'))roots.push($('#app'));$$('dialog[open]').forEach(d=>roots.push(d));if(!roots.length)roots.push(document);const out=[];roots.forEach(r=>$$(selectors,r).forEach(el=>{if(!out.includes(el)&&el.offsetParent!==null)out.push(el)}));return out}
+function ensureLessonStepVisual(){const lesson=$('#lesson'),copy=$('#copy');if(!lesson?.open||!copy)return;if(copy.querySelector('.ba-lesson-hero,.lesson-visual,.ba-auto-lesson-visual'))return;const box=document.createElement('div');box.className='ba-auto-lesson-visual';box.setAttribute('aria-hidden','true');box.style.cssText='height:220px;border-radius:18px;margin:0 0 18px;background-size:cover;background-position:center;';copy.prepend(box)}
+function slotBases(elements){const seen={};return elements.map(el=>{const role=roleKey(),view=viewKey(),title=norm(nearestTitle(el))||'-',explicit=[el.id,el.dataset?.l,el.dataset?.play,el.dataset?.j,el.closest('[data-l]')?.dataset?.l,el.closest('[data-play]')?.dataset?.play].filter(Boolean).join(':')||'-',modal=el.closest('#lesson')?`lesson:${norm(lessonContext())}`:el.closest('#gameModal')?`game:${norm(gameContext())}`:'page',base=`${role}|${view}|${modal}|${kind(el)}|${explicit}|${title}`,n=seen[base]||0;seen[base]=n+1;return`${base}|occ:${n}`})}
+function assetCandidates(category){const cats=[category,...(RELATED[category]||[])],rows=[];cats.forEach(c=>(POOLS[c]||[]).forEach(id=>{const a=ALL_BY_ID.get(id);if(a)rows.push(a)}));return rows}
+function fallbackAsset(category,key){const id=`fallback:${hash32(`${BUILD}|${key}`)}`,lock=10000+(hash32(`${key}|photo`)%900000000);return{id,category,url:`https://loremflickr.com/1600/900/${encodeURIComponent(FALLBACK_QUERY[category]||FALLBACK_QUERY.coast)}?lock=${lock}`}}
+function assignAsset(key,category,avoid=new Set()){const existing=state.slots[key];if(existing&&!state.failed[existing]&&!avoid.has(existing)){const a=ALL_BY_ID.get(existing);if(a)return a;if(existing.startsWith('fallback:'))return fallbackAsset(category,key)}if(existing&&state.used[existing]===key)delete state.used[existing];const candidates=assetCandidates(category),offset=candidates.length?hash32(`${BUILD}|${key}|${category}`)%candidates.length:0;for(let i=0;i<candidates.length;i++){const a=candidates[(offset+i)%candidates.length];if(state.failed[a.id]||avoid.has(a.id))continue;const owner=state.used[a.id];if(!owner||owner===key){state.slots[key]=a.id;state.used[a.id]=key;persist();return a}}const a=fallbackAsset(category,key);state.slots[key]=a.id;state.used[a.id]=key;persist();return a}
+const probed=new Set();
+function probe(asset,key){if(probed.has(asset.id)||asset.id.startsWith('fallback:'))return;probed.add(asset.id);const img=new Image();img.onload=()=>{};img.onerror=()=>{state.failed[asset.id]=true;if(state.slots[key]===asset.id)delete state.slots[key];if(state.used[asset.id]===key)delete state.used[asset.id];persist();setTimeout(audit,30)};img.src=asset.url}
+function apply(el,asset,key,category){el.dataset.baPhotoId=asset.id;el.dataset.baPhotoSlot=key;el.dataset.baPhotoCategory=category;el.dataset.baVisualUrl=asset.url;const hero=el.matches('.auth-art,.art,.ba-hero,.heroCard,.premiumHero,.premiumStrip,.ba-lesson-hero,.ba-auto-lesson-visual,.game-visual,.ba-game-visual'),overlay=hero?'linear-gradient(120deg,rgba(3,31,48,.74),rgba(5,62,78,.34),rgba(4,35,49,.14)),':'';el.style.backgroundImage=`${overlay}url("${asset.url}")`;el.style.backgroundSize='cover';el.style.backgroundPosition='center';if(!el.closest('[aria-hidden="true"]')&&!el.hasAttribute('aria-label')){el.setAttribute('role','img');el.setAttribute('aria-label',DESCR[category]||'Θαλάσσια εικόνα BlueAbility')}probe(asset,key)}
+function audit(){ensureLessonStepVisual();const elements=visualElements(),keys=slotBases(elements),domUsed=new Set();elements.forEach((el,i)=>{const key=keys[i],category=semanticFor(el);let asset=assignAsset(key,category,domUsed);if(domUsed.has(asset.id)){if(state.used[asset.id]===key)delete state.used[asset.id];delete state.slots[key];asset=assignAsset(`${key}|repair:${i}`,category,domUsed)}domUsed.add(asset.id);apply(el,asset,key,category)});const owners=new Map();elements.forEach((el,i)=>{const id=el.dataset.baPhotoId;if(!id)return;if(owners.has(id)){const key=`${keys[i]}|final-repair:${i}`,category=semanticFor(el);delete state.slots[keys[i]];const a=assignAsset(key,category,new Set(owners.keys()));apply(el,a,key,category);owners.set(a.id,el)}else owners.set(id,el)});window.dispatchEvent(new CustomEvent('blueability:visual-audit',{detail:{total:elements.length,unique:owners.size}}))}
+let raf=0;function schedule(){cancelAnimationFrame(raf);raf=requestAnimationFrame(()=>setTimeout(audit,20))}
+const mo=new MutationObserver(muts=>{if(muts.some(m=>m.type==='childList'))schedule()});mo.observe(document.documentElement,{childList:true,subtree:true});window.addEventListener('load',()=>setTimeout(audit,120));document.addEventListener('click',()=>setTimeout(audit,80),true);document.addEventListener('change',()=>setTimeout(audit,80),true);window.addEventListener('popstate',()=>setTimeout(audit,80));setTimeout(audit,220);
+window.BlueAbilityVisualAudit=()=>{const elements=visualElements(),rows=elements.map(el=>({role:roleKey(),view:viewKey(),slot:el.dataset.baPhotoSlot||'',category:el.dataset.baPhotoCategory||'',photo:el.dataset.baPhotoId||'',title:nearestTitle(el)})),counts={};rows.forEach(r=>{if(r.photo)counts[r.photo]=(counts[r.photo]||0)+1});return{build:BUILD,total:rows.length,unique:new Set(rows.map(r=>r.photo).filter(Boolean)).size,duplicates:Object.entries(counts).filter(([,n])=>n>1),globalSlots:Object.keys(state.slots).length,rows}}
 })();
