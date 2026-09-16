@@ -1,4 +1,9 @@
 // BlueAbility Accessibility First loader
+const favicon=document.createElement('link');
+favicon.rel='icon';
+favicon.type='image/svg+xml';
+favicon.href='./favicon.svg?v=20260916fav1';
+document.head.appendChild(favicon);
 const parts=['app.pack.00','app.pack.01','app.pack.02','app.pack.03','app.pack.04','app.pack.05','app.pack.06'];
 if(!('DecompressionStream' in window)) throw new Error('Το πρόγραμμα περιήγησης χρειάζεται υποστήριξη DecompressionStream.');
 const packed=(await Promise.all(parts.map(async p=>{const r=await fetch('./'+p+'?v=20260915a11y1',{cache:'force-cache'});if(!r.ok)throw new Error('Αποτυχία φόρτωσης '+p);return r.text()}))).join('');
