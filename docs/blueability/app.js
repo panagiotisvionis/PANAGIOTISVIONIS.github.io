@@ -17,4 +17,5 @@ try{
   await import('./accessibility-first.js?v=20260915a11y2');
   await import('./visual-dedupe.js?v=20260916semantic1');
   await import('./ui-template-fix.js?v=20260916ui1');
+  await import('./login-hero.js?v=20260916login1');
 }finally{URL.revokeObjectURL(url)}
