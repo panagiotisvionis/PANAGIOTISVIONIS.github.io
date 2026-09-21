@@ -273,7 +273,10 @@ function all(s,c){return Array.prototype.slice.call((c||document).querySelectorA
 function storeGet(k){try{return window.localStorage?localStorage.getItem(k):null}catch(e){return null}}
 function storeSet(k,v){try{if(window.localStorage)localStorage.setItem(k,v)}catch(e){}}
 function storeRemove(k){try{if(window.localStorage)localStorage.removeItem(k)}catch(e){}}
-function load(){try{var d=JSON.parse(storeGet(K))||{};d.progress=d.progress||{};d.unitProgress=d.unitProgress||{};d.quiz=d.quiz||null;return d}catch(e){return{progress:{},unitProgress:{},quiz:null}}}
+function progressKey(id){return K+"_"+(id||(st.u&&st.u.id)||"guest")}
+function normalizeProgress(d){d=d||{};d.progress=d.progress||{};d.unitProgress=d.unitProgress||{};d.quiz=d.quiz||null;return d}
+function loadFor(id){try{return normalizeProgress(JSON.parse(storeGet(progressKey(id)))||{})}catch(e){return normalizeProgress({})}}
+function load(){return loadFor(st.u&&st.u.id)}
 function unitState(n){var d=load(),s=d.unitProgress[String(n)]||{};return{visited:!!s.visited,game:!!s.game,quizAttempted:!!s.quizAttempted,passed:!!s.passed,score:Number(s.score||0)}}
 function setUnitState(n,patch){var d=load(),k=String(n),s=d.unitProgress[k]||{};Object.keys(patch).forEach(function(x){s[x]=patch[x]});d.unitProgress[k]=s;save(d)}
 function unitPercent(n){if(Number(n)===1){var d=load(),steps=["continuity","words","alphabet","dialects"].filter(function(k){return d.progress[k]}).length,s=d.unitProgress["1"]||{};return Math.min(100,steps*15+(s.game?10:0)+(s.quizAttempted?10:0)+(s.passed?20:0))}var s=unitState(n);return Math.min(100,(s.visited?20:0)+(s.game?30:0)+(s.quizAttempted?20:0)+(s.passed?30:0))}
@@ -288,8 +291,9 @@ function applyPrefs(){var p=userPrefs();document.body.classList.toggle("large-te
 function toggleProfileMenu(){st.profileOpen=!st.profileOpen;var m=el("#profileMenu");if(m)m.hidden=!st.profileOpen}
 function profileMenu(){var r=rewardInfo(),p=userPrefs();return '<div class="profile-menu" id="profileMenu" '+(st.profileOpen?'':'hidden')+'><div class="profile-head"><div class="avatar">'+st.u.name.charAt(0)+'</div><div class="profile-meta"><b>'+st.u.name+'</b><span>'+roleName[st.u.role]+' • '+r.xp+' XP</span></div></div><div class="profile-stats"><div class="profile-stat"><b>'+r.count+'</b><span>ενότητες</span></div><div class="profile-stat"><b>'+overallPercent()+'%</b><span>σύνολο</span></div><div class="profile-stat"><b>'+r.level+'</b><span>level</span></div></div><div class="reward-card" style="padding:10px;margin:8px 0"><div class="reward-medal">✦</div><div><h3 style="font-size:13px">'+r.name+'</h3><p>'+r.xp+' XP συνολικά</p></div></div><div class="profile-actions"><button onclick="go(\'content\');st.profileOpen=false">🏆 Επιβραβεύσεις & πρόοδος</button><button onclick="go(\'live\');st.profileOpen=false">◎ Η τάξη μου</button></div><div class="setting-row"><span>Μεγαλύτερα γράμματα</span><input type="checkbox" '+(p.largeText?'checked':'')+' onchange="setPref(\'largeText\',this.checked)"></div><div class="setting-row"><span>Μειωμένες κινήσεις</span><input type="checkbox" '+(p.reducedMotion?'checked':'')+' onchange="setPref(\'reducedMotion\',this.checked)"></div><div class="profile-actions"><button onclick="logout()">↪ Έξοδος</button></div></div>'}
 
-function save(d){storeSet(K,JSON.stringify(d))}
-function login(id){storeSet(S,id);st.u=users.find(function(x){return x.id===id})||users[0];st.p="dashboard";render()}
+function save(d){storeSet(progressKey(),JSON.stringify(normalizeProgress(d)))}
+function ensureDemoStudentProgress(){var samples={maria:[92,85,78,100,66,0,0,0,0,0,0,0,0,0,0,0,0,0],nikos:[100,90,82,74,0,0,0,0,0,0,0,0,0,0,0,0,0,0],eleni:[88,80,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],giannis:[100,100,95,86,72,65,0,0,0,0,0,0,0,0,0,0,0,0],sofia:[75,70,68,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],kostas:[60,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]};Object.keys(samples).forEach(function(id){if(storeGet(progressKey(id)))return;var d=normalizeProgress({});samples[id].forEach(function(score,i){if(score>0)d.unitProgress[String(i+1)]={visited:true,game:score>=70,quizAttempted:true,passed:score>=70,score:score}});storeSet(progressKey(id),JSON.stringify(d))})}
+function login(id){storeSet(S,id);st.u=users.find(function(x){return x.id===id})||users[0];st.p="dashboard";ensureDemoStudentProgress();render()}
 function logout(){storeRemove(S);st.u=null;render()}
 function go(p){st.p=p;render();scrollTo(0,0)}
 function roleIcon(r){return r==="super_admin"?"◆":r==="teacher"?"✦":"•"}
