@@ -9,7 +9,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="content-library.css?v=20260922">
+<link rel="stylesheet" href="content-library.css?v=20260922b">
 <style>
 :root{
  --ink:#102944;--ink2:#183c61;--blue:#0f4d7f;--blue2:#176aa2;--sand:#c99a58;--olive:#738164;
@@ -524,6 +524,6 @@ if(st.p==="live"){all("[data-preset]").forEach(function(p){p.onclick=function(){
 function render(){if(!st.u){el("#root").innerHTML=loginPage();return}var body=st.p==="content"?content():st.p==="unit"?unitPage():st.p==="live"?livePage():st.p==="progress"&&st.u.role!=="student"?studentProgressPage():st.p==="approvals"&&st.u.role!=="student"?approvalsPage():st.p==="admin"&&st.u.role==="super_admin"?admin():st.p==="dictionary"?placeholder("Λεξικό","Αναζήτηση και εξερεύνηση λέξεων της Αρχαίας Ελληνικής με σύνδεση στις πηγές του project."):st.p==="grammar"?placeholder("Γραμματική","Οργανωμένη γραμματική αναφορά με παραδείγματα και μικρές δραστηριότητες."):dashboard();el("#root").innerHTML=body;applyPrefs();bind()}
 (function(){var q=new URLSearchParams(location.search).get("demo"),map={panagiotis:"pan",super_admin:"pan",teacher:"teacher",student:"maria",maria:"maria"};if(q&&map[q])storeSet(S,map[q]);var id=storeGet(S);st.u=users.find(function(x){return x.id===id})||null;ensureDemoStudentProgress();render()})();
 </script>
-<script src="content-library.js?v=20260922"></script>
+<script src="content-library.js?v=20260922b"></script>
 </body>
 </html>
