@@ -10,6 +10,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="content-library.css?v=20260922b">
+<link rel="stylesheet" href="role-experience.css?v=20260922a">
 <style>
 :root{
  --ink:#102944;--ink2:#183c61;--blue:#0f4d7f;--blue2:#176aa2;--sand:#c99a58;--olive:#738164;
@@ -525,5 +526,6 @@ function render(){if(!st.u){el("#root").innerHTML=loginPage();return}var body=st
 (function(){var q=new URLSearchParams(location.search).get("demo"),map={panagiotis:"pan",super_admin:"pan",teacher:"teacher",student:"maria",maria:"maria"};if(q&&map[q])storeSet(S,map[q]);var id=storeGet(S);st.u=users.find(function(x){return x.id===id})||null;ensureDemoStudentProgress();render()})();
 </script>
 <script src="content-library.js?v=20260922b"></script>
+<script src="role-experience.js?v=20260922a"></script>
 </body>
 </html>
