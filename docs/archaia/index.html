@@ -250,6 +250,49 @@ body.large-text{font-size:18px}body.large-text .lesson-card p,body.large-text .n
 .login-visual:before,.login-visual:after{display:none!important;content:none!important}
 .login-panel{min-height:100vh!important;display:flex!important;align-items:center!important;justify-content:center!important;background:#f8f6f0!important}
 @media(max-width:900px){.login{grid-template-columns:1fr!important}.login-visual{min-height:38vh!important}.login-panel{min-height:62vh!important}}
+
+/* LOGIN RESTORE: only the background changes; original branding/content stays */
+.login{display:grid!important;grid-template-columns:minmax(0,2fr) minmax(390px,1fr)!important;min-height:100vh!important}
+.login-visual{
+  position:relative!important;
+  display:flex!important;
+  align-items:flex-end!important;
+  min-height:100vh!important;
+  padding:64px!important;
+  background:#111 url('./login-bg.webp?v=restore-1') center center/cover no-repeat!important;
+}
+.login-visual:before{
+  display:block!important;
+  content:""!important;
+  position:absolute!important;
+  inset:0!important;
+  background:linear-gradient(180deg,rgba(7,28,47,.04) 0%,rgba(7,28,47,.18) 50%,rgba(7,28,47,.72) 100%)!important;
+  pointer-events:none!important;
+}
+.login-visual:after{display:none!important;content:none!important}
+.login-visual>div{
+  display:block!important;
+  position:relative!important;
+  z-index:2!important;
+  max-width:700px!important;
+  color:white!important;
+}
+.login-visual>div img{height:62px!important;max-width:270px!important}
+.login-visual h1{font-size:76px!important;line-height:.95!important;margin:24px 0 18px!important;color:white!important}
+.login-visual h2{font-size:28px!important;line-height:1.28!important;color:white!important;margin:0!important}
+.login-visual p{max-width:640px!important;color:#f3f5f6!important;font-size:15px!important;line-height:1.65!important;margin:20px 0!important}
+.login-visual .quote{color:#f5e6c4!important;border-top:1px solid rgba(255,255,255,.35)!important;padding-top:20px!important;margin-top:22px!important;font-size:16px!important}
+.login-panel{min-height:100vh!important;display:flex!important;align-items:center!important;justify-content:center!important;background:#f8f6f0!important;padding:28px!important}
+.loginbox{width:min(100%,480px)!important}
+@media(max-width:900px){
+  .login{grid-template-columns:1fr!important}
+  .login-visual{min-height:42vh!important;padding:28px!important;background-position:center 45%!important}
+  .login-visual h1{font-size:52px!important}
+  .login-visual h2{font-size:22px!important}
+  .login-visual p{display:none!important}
+  .login-visual .quote{display:none!important}
+  .login-panel{min-height:58vh!important;padding:18px!important}
+}
 </style>
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230f3152'/%3E%3Cpath d='M16 48c7-2 12-8 15-17 3-9 8-14 17-16-1 8-5 14-11 18-5 4-11 6-21 15Z' fill='none' stroke='%23d8b978' stroke-width='4' stroke-linecap='round' stroke-linejoin='round'/%3E%3Cpath d='M19 45c8-6 15-13 25-25' stroke='%23d8b978' stroke-width='3' stroke-linecap='round'/%3E%3C/svg%3E">
 <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230f3152'/%3E%3Cpath d='M16 48c7-2 12-8 15-17 3-9 8-14 17-16-1 8-5 14-11 18-5 4-11 6-21 15Z' fill='none' stroke='%23d8b978' stroke-width='4' stroke-linecap='round'/%3E%3Cpath d='M19 45c8-6 15-13 25-25' stroke='%23d8b978' stroke-width='3' stroke-linecap='round'/%3E%3C/svg%3E">
